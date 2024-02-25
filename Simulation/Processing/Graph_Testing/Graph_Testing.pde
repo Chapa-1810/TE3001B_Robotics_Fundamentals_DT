@@ -50,16 +50,13 @@ void setup(){
 }
 
 void draw(){
+  String palabra = "Hola ";
   for (int i = 0; i < 26; i++){
-    boolean visited[] = {false, false, false, false, false, false, false, false, false}; 
-    Graph curr_graph = new Graph(1);
+    Graph curr_graph = new Graph();
     curr_graph = graphs.get(i);
     System.out.print(str(char(i + 'A')) + " ");
-    //curr_graph.printAdjcList();
-    curr_graph.resetCopySet();
-    curr_graph.traverseDFS(0, visited, 0, 0);
-    //curr_graph.iterateOverSet();
+    curr_graph.DFS(0,0);
     System.out.println(" " + "Finished");
   }
   System.out.println("------------------------------------------------------");
-}  
+}
