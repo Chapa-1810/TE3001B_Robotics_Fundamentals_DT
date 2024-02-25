@@ -10,17 +10,32 @@ import pyaudio
 import os
 from threading import Thread
 import whisper
+import socket
+import sys
 
 silero_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad', force_reload=True)
 WHISPER_MODEL = "base"
-
+HOSTNAME = "localhost"
+PORT = 9999
 
 class VAD_Text_to_Speech:
     
-    def __init__(self, silero_model,silero_utils, whisper_model) -> None:
+    def __init__(self, silero_model,silero_utils, whisper_model, text_socket) -> None:
         self.silero_model = silero_model
         self.whisper_model = whisper_model
         self.utils = silero_utils
+        self.socket = text_socket
+        try:
+            self.socket["socket"].bind((self.socket["hostname"], self.socket["port"]))
+        except Exception as e:
+            self.socket["socket"].close()
+            self.socket["socket"] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket["socket"].bind((self.socket["hostname"], self.socket["port"]))
+        self.socket["socket"].listen(1)
+        print(f"Listening on {self.socket['hostname']}:{self.socket['port']}")
+        print("Waiting for connection...")
+        self.client, self.addr = self.socket["socket"].accept()
+        print(f"Connected to {self.addr}")
         FORMAT = pyaudio.paInt16
         CHANNELS = 1
         SAMPLE_RATE = 16000
@@ -35,7 +50,8 @@ class VAD_Text_to_Speech:
                             channels=CHANNELS,
                             rate=SAMPLE_RATE,
                             input=True,
-                            frames_per_buffer=CHUNK)
+                            frames_per_buffer=CHUNK,
+                            )
     
     
 
@@ -101,9 +117,23 @@ class VAD_Text_to_Speech:
         result = self.whisper_model.transcribe(audio_np, language="es", fp16=torch.cuda.is_available())
         text = result['text'].strip()
         print(f"Whisper: {text}")
+        try:
+            self.client.sendall(text.encode())
+        except socket.error as e:
+            connected = False
+            self.client.close()
+            self.socket["socket"].listen(1)
+            self.client, self.addr = self.socket["socket"].accept()
+            print(f"Connected to {self.addr}")
+            self.client.sendall(text.encode())
         pass
 
 if __name__ == "__main__" :
+    text_socket = {
+        "hostname": "localhost",
+        "port": 9999,
+        "socket": socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    }
     whisper_model = whisper.load_model(WHISPER_MODEL)
-    vad = VAD_Text_to_Speech(silero_model, utils, whisper_model)
+    vad = VAD_Text_to_Speech(silero_model, utils, whisper_model, text_socket)
     vad.listen()
