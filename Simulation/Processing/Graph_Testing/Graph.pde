@@ -2,14 +2,24 @@ import java.util.*;
 
 class Graph {
   int scale;
-
-  final int x_scaling_factor = 2;
+  int x_scaling_factor = 2;
+  
   final int amount_nodes = 9;
+  final int start_node = 6;
   ArrayList<Node> nodes;
   HashSet<String> set;
   HashSet<String> copy_set;
 
   String[] headers = {"a", "b", "c", "d", "e", "f", "g1", "g2", "h", "i", "j", "k", "l", "m"};
+  
+   public Graph() {
+    this.scale = 0;
+    this.nodes = new ArrayList<Node>();
+    this.set = new HashSet<String>();
+    this.copy_set = new HashSet<String>();
+
+    for (int i = 0; i < amount_nodes; i++) this.nodes.add(new Node(i));
+  }
 
   public Graph(int scale) {
     this.scale = scale;
@@ -18,6 +28,11 @@ class Graph {
     this.copy_set = new HashSet<String>();
 
     for (int i = 0; i < amount_nodes; i++) this.nodes.add(new Node(i));
+  }
+  
+  public void setScaleAndScalingFactor(int scale, int x_scaling_factor){
+    this.scale = scale;
+    this.x_scaling_factor = x_scaling_factor;
   }
 
   public int[] computeEdges(int index) {
@@ -73,6 +88,13 @@ class Graph {
     
     return edges;
   }
+  
+   public void DFS(int start_x, int start_y){
+    boolean visited[] = {false, false, false, false, false, false, false, false, false}; 
+     
+    this.resetCopySet();
+    this.traverseDFS(6 , visited, start_x, start_y);
+  }
 
   public void traverseDFS(int start, boolean[] visited, int curr_x, int curr_y) {
     visited[start] = true;
@@ -106,7 +128,7 @@ class Graph {
             curr_x+=scale/x_scaling_factor;
           }
         }
-        //draw(prev_x, prev_y, curr_x, curr_y);
+        //draw(prev_x, prev_y, curr_x, curr_y, face);
         this.traverseDFS(next, visited, curr_x, curr_y);
       }
     }
