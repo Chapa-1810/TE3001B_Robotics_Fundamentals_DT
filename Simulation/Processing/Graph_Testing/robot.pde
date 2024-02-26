@@ -51,7 +51,7 @@ class Robot {
    // Se crea vector de nodos visitados
    // Se reseta el set que sera modificado
    // Se callea traverse DFS con sus parametros
-   public void DFS(int index, int start_x, int start_y){
+   public void DFS(int index, float start_x, float start_y){
     boolean visited[] = {false, false, false, false, false, false, false, false, false}; 
      
     graphs.get(index).resetCopySet();
@@ -116,9 +116,13 @@ class Robot {
   // Nos vemos de espacio de origen dependiendo de FONT SIZE
   public void writePhrase(String phrase){
     // inicio caja (x,y)
-    int x = 0, y = 0;
+    float x = -cubeSize/2, y = 0;
     // FONT SIZE DETERMINADO POR TAMANIO DE FRASE Y ESPACIO DISPONIBLE
-    scale = 1; x_scaling_factor = 1;
+    float spacing_factor = 0.5; // size of the space relative to the letter
+    float num_factors = phrase.length() + ((phrase.length()-1) * spacing_factor);
+    scale = cubeSize/num_factors;
+    //scale = (cubeSize / (1.5*phrase.length() - 1)); 
+    x_scaling_factor = 2;
     
     for (int i =0 ; i < phrase.length(); i++){
       if (phrase.charAt(i) != ' '){
@@ -129,8 +133,7 @@ class Robot {
          coords.add(" ");
       }
       
-      x += 4; // FONT SIZE
-      y += 0; // FONT SIZE
+      x += scale + scale*spacing_factor; // FONT SIZEs
     }
   }
   

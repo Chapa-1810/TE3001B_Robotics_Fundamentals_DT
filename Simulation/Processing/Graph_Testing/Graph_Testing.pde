@@ -13,8 +13,8 @@ float[] Xsphere = new float[999];
 float[] Ysphere = new float[999];
 float[] Zsphere = new float[999];
 
-int cubeSize = 100;
-int cubePosZ = -50;
+float cubeSize = 125;
+float cubePosX = 0, cubePosY = 0, cubePosZ = -6;
 
 ArrayList<Float> draw_coords_x = new ArrayList<Float>();
 ArrayList<Float> draw_coords_y = new ArrayList<Float>();
@@ -57,8 +57,8 @@ void writePos(int j, int face){
   IK();
   setTime();
 
-  float posDX = -draw_coords_x.get(j)*10 + 100;
-  float posDY = -draw_coords_y.get(j)*10;
+  float posDX = -draw_coords_x.get(j);
+  float posDY = -draw_coords_y.get(j);
   
   switch(face){
     case 1:
@@ -107,7 +107,7 @@ void linearInterpolation(ArrayList<FloatList> coords, int stepsBetweenPoints){
     if (i < coords.size() - 1){
       next_x = coords.get(i+1).get(0);
       next_y = coords.get(i+1).get(1);
-      if (next_x != x1 && next_y != y1){
+      if (next_x != x1 || next_y != y1){
         for (int j = 0; j < stepsBetweenPoints; j++){
           draw_coords_x.add(x1 + (next_x - x1) * j / stepsBetweenPoints);
           draw_coords_y.add(y1 + (next_y - y1) * j / stepsBetweenPoints);
@@ -139,7 +139,7 @@ void draw(){
   while (flag == true){
     if(flag){
     //if ((client = server.available()) != null && flag) {     //System.out.println("------------------------------");
-     String data = "DANNY;5;", phrase="";//
+     String data = "WALTER WHITE;3;", phrase="";//
      //String data = client.readString(), phrase = "";
      println("Received: " + data);
      
@@ -218,8 +218,15 @@ void draw(){
      popMatrix();
     }
     
+   stroke(#000000);
+   noFill();
+   translate(-cubePosY, -cubePosZ, -cubePosX);
+   box(cubeSize); 
+   
+   noStroke();
+    
    fill(#FFE308);  
-   translate(0,-40,0);   
+   translate(cubePosY,-40+cubePosZ,cubePosX);   
      shape(base);
      
    translate(0, 4, 0);
