@@ -18,7 +18,7 @@ silero_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='s
 WHISPER_MODEL = "base"
 spacy_model_name = "es_dep_news_trf"
 HOSTNAME = '127.0.0.1'  # The server's hostname or IP address
-PORT = 65432        # The port used by the server
+PORT = 65432      # The port used by the server
 
 
 class VAD_Text_to_Speech:
@@ -87,7 +87,7 @@ class VAD_Text_to_Speech:
 
         frames_to_record = 50
 
-        print("Started Recording")
+        print("Started listening")
         
         recorded_audio = []
 
@@ -134,7 +134,10 @@ class VAD_Text_to_Speech:
         print(f"Target word is {target_word}, target face is {target_face}")
         
         if self.socket is not None:
-            msg = bytes(f"{target_word.text};{target_face.text};", "utf-8")
+            #uppercase
+            target_word = target_word.text.upper()
+            target_face = target_face.text.upper()
+            msg = bytes(f"{target_word};{target_face};", "utf-8")
             if self.socket_type == "server":
                 try:
                     self.client.sendall(msg)

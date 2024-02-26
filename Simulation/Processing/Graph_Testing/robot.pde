@@ -3,6 +3,8 @@ import java.util.*;
 class Robot {
   ArrayList<Graph> graphs;
   ArrayList<String> coords;
+  ArrayList<Float> num_coords_x;
+  ArrayList<Float> num_coords_y;
   int start_node = 6;
   
   String path = "letters.json";
@@ -18,6 +20,8 @@ class Robot {
      this.loadGraphs(path);
      
      this.coords = new ArrayList<String>();
+     this.num_coords_x = new ArrayList<Float>();
+      this.num_coords_y = new ArrayList<Float>();
      //this.loadShapes();
    }
    
@@ -53,6 +57,8 @@ class Robot {
     boolean visited[] = {false, false, false, false, false, false, false, false, false}; 
      
     graphs.get(index).resetCopySet();
+    this.num_coords_x.add(float(start_x));
+    this.num_coords_y.add(float(start_y));
     traverseDFS(graphs.get(index), start_node , visited, start_x, start_y);
   }
   
@@ -93,6 +99,8 @@ class Robot {
         }
         // Recursive function
         coords.add(curr_x + "," + curr_y + "," + next_x + "," + next_y + ";");
+        this.num_coords_x.add(next_x);
+        this.num_coords_y.add(next_y);
         //this.moveArm(prev_x, prev_y, curr_x, curr_y, face);
         this.traverseDFS(curr_graph, next, visited, next_x, next_y);
       }
@@ -128,5 +136,7 @@ class Robot {
   
   public void cleanCords(){
     coords.clear();
+    num_coords_x.clear();
+    num_coords_y.clear();
   }
 }

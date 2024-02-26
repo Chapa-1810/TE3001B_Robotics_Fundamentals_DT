@@ -3,16 +3,18 @@
  //ArrayList<Graph> graphs;
 PShape base, shoulder, upArm, loArm, end;
 float rotX, rotY;
-float posX=1, posY=50, posZ=50;
+float posX=1, posY=40, posZ=50;
 float alpha, beta, gamma;
 float F = 50;
 float T = 70;
 float millisOld, gTime, gSpeed = 4;
 
-float[] Xsphere = new float[99];
-float[] Ysphere = new float[99];
-float[] Zsphere = new float[99];
+float[] Xsphere = new float[999];
+float[] Ysphere = new float[999];
+float[] Zsphere = new float[999];
 
+ArrayList<Float> draw_coords_x = new ArrayList<Float>();
+ArrayList<Float> draw_coords_y = new ArrayList<Float>();
 
 ArrayList<String> coords;
 int index = 0;
@@ -47,7 +49,7 @@ void setTime(){
   millisOld = (float)millis()/1000;
 }
 
-void writePos(ArrayList<String> coords, int j, int face){
+/*void writePos(ArrayList<String> coords, int j, int face){
   if (j >= coords.size() - 1){
     flag = true;
     return;
@@ -79,7 +81,29 @@ void writePos(ArrayList<String> coords, int j, int face){
   posX = curr_x * 20;
   posZ = -curr_y * 10;
   
+}*/
+
+void writePos(int j, int face){
+  IK();
+  setTime();
+  posX = draw_coords_x.get(j) * 10 - 70;
+  posZ = draw_coords_y.get(j) * 10;
 }
+
+void linearInterpolation(ArrayList<Float> x_coords, ArrayList<Float> y_coords, int stepsBetweenPoints){
+  float x0, y0, x1, y1;
+  for (int i = 0; i < x_coords.size() - 1; i++){
+    x0 = x_coords.get(i);
+    y0 = y_coords.get(i);
+    x1 = x_coords.get(i+1);
+    y1 = y_coords.get(i+1);
+    for (int j = 0; j < stepsBetweenPoints; j++){
+      draw_coords_x.add(x0 + (x1 - x0) * j / stepsBetweenPoints);
+      draw_coords_y.add(y0 + (y1 - y0) * j / stepsBetweenPoints);
+    }
+  }
+}
+
 
 void setup(){
   size(1200, 800, OPENGL);
@@ -97,8 +121,10 @@ void draw(){
    //if (myClient.available() > 0) { 
    //   dataIn = myClient.read(); 
    //} 
-   if ((client = server.available()) != null && flag) {
-     //System.out.println("------------------------------");
+   //if (flag){//(client = server.available()) != null && flag) {
+  while (flag == true){
+    if ((client = server.available()) != null && flag) {     //System.out.println("------------------------------");
+     //String data = "ROBOT;1;", phrase="";//
      String data = client.readString(), phrase = "";
      println("Received: " + data);
      
@@ -115,12 +141,32 @@ void draw(){
      //for (String ss : robot_.coords) System.out.println(ss + " "); 
      //System.out.println("------------------------------");
      flag = false;
+     for (int i = 0; i < robot_.num_coords_x.size(); i++){
+       //System.out.println(robot_.coords.get(i));
+       System.out.println(robot_.num_coords_x.get(i) + " " + robot_.num_coords_y.get(i));
+       System.out.println("------");
+     }
+     // wait 10000 ms
+     linearInterpolation(robot_.num_coords_x, robot_.num_coords_y, 5);
+     for (int i = 0; i < draw_coords_x.size(); i++){
+       System.out.println(draw_coords_x.get(i) + " " + draw_coords_y.get(i));
+     }
+     Xsphere = new float[draw_coords_x.size()];
+      Ysphere = new float[draw_coords_x.size()];
+      Zsphere = new float[draw_coords_x.size()];
    }
-   if (robot_.coords.size() > 0)
-     writePos(robot_.coords, index++, face);
-   
-   
-   background(32);
+  }
+  
+  if (index > draw_coords_x.size() - 1){
+    flag = false;
+    index = 0;
+    return;
+  }
+
+  writePos(index, face);
+  index++;
+
+   background(255);
    smooth();
    lights(); 
    directionalLight(51, 102, 126, -1, 0, 0);
@@ -145,8 +191,8 @@ void draw(){
    for (int i=0; i < Xsphere.length; i++) {
      pushMatrix();
      translate(-Ysphere[i], -Zsphere[i]-11, -Xsphere[i]);
-     fill (#D003FF, 25);
-     sphere (float(i) / 20);
+     fill (#D003FF, 200);
+     sphere (2);
      popMatrix();
     }
     
