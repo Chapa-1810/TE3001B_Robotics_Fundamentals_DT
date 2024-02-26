@@ -17,29 +17,34 @@ import spacy
 silero_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad', force_reload=False)
 WHISPER_MODEL = "base"
 spacy_model_name = "es_dep_news_trf"
-HOSTNAME = "localhost"
-PORT = 9999
+HOSTNAME = '127.0.0.1'  # The server's hostname or IP address
+PORT = 65432        # The port used by the server
+
 
 class VAD_Text_to_Speech:
     
-    def __init__(self, silero_model,silero_utils, whisper_model, spacy_model, text_socket=None) -> None:
+    def __init__(self, silero_model,silero_utils, whisper_model, spacy_model, text_socket=None, socket_type=None) -> None:
         self.silero_model = silero_model
         self.whisper_model = whisper_model
         self.spacy_model = spacy_model
         self.utils = silero_utils
         self.socket = text_socket
+        self.socket_type = socket_type
         if self.socket is not None:
-            try:
-                self.socket["socket"].bind((self.socket["hostname"], self.socket["port"]))
-            except Exception as e:
-                self.socket["socket"].close()
-                self.socket["socket"] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                self.socket["socket"].bind((self.socket["hostname"], self.socket["port"]))
-            self.socket["socket"].listen(1)
-            print(f"Listening on {self.socket['hostname']}:{self.socket['port']}")
-            print("Waiting for connection...")
-            self.client, self.addr = self.socket["socket"].accept()
-            print(f"Connected to {self.addr}")
+            if socket_type == "client":
+                self.socket["socket"].connect((self.socket["hostname"], self.socket["port"]))
+            elif socket_type == "server":
+                try:
+                    self.socket["socket"].bind((self.socket["hostname"], self.socket["port"]))
+                except Exception as e:
+                    self.socket["socket"].close()
+                    self.socket["socket"] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.socket["socket"].bind((self.socket["hostname"], self.socket["port"]))
+                self.socket["socket"].listen(1)
+                print(f"Listening on {self.socket['hostname']}:{self.socket['port']}")
+                print("Waiting for connection...")
+                self.client, self.addr = self.socket["socket"].accept()
+                print(f"Connected to {self.addr}")
         else:
             print("No socket provided")
         FORMAT = pyaudio.paInt16
@@ -128,18 +133,20 @@ class VAD_Text_to_Speech:
         
         print(f"Target word is {target_word}, target face is {target_face}")
         
-        
         if self.socket is not None:
-            try:
-                self.client.sendall(text.encode())
-            except socket.error as e:
-                connected = False
-                self.client.close()
-                self.socket["socket"].listen(1)
-                self.client, self.addr = self.socket["socket"].accept()
-                print(f"Connected to {self.addr}")
-                self.client.sendall(text.encode())
-            pass
+            msg = bytes(f"{target_word.text};{target_face.text};", "utf-8")
+            if self.socket_type == "server":
+                try:
+                    self.client.sendall(msg)
+                except socket.error as e:
+                    self.client.close()
+                    self.socket["socket"].listen(1)
+                    self.client, self.addr = self.socket["socket"].accept()
+                    print(f"Connected to {self.addr}")
+                    self.client.sendall(msg)
+                pass
+            else:
+                self.socket["socket"].sendall(msg)
     
     def get_target_word_and_face(self, text):
         doc = self.spacy_model(text)
@@ -164,12 +171,12 @@ class VAD_Text_to_Speech:
 
 if __name__ == "__main__" :
     text_socket = {
-        "hostname": "localhost",
-        "port": 9999,
+        "hostname": HOSTNAME,
+        "port": PORT,
         "socket": socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     }
     spacy_model = spacy.load(spacy_model_name)
     whisper_model = whisper.load_model(WHISPER_MODEL)
-    #vad = VAD_Text_to_Speech(silero_model, utils, whisper_model, spacy_model, text_socket)
-    vad = VAD_Text_to_Speech(silero_model, utils, whisper_model, spacy_model)
+    vad = VAD_Text_to_Speech(silero_model, utils, whisper_model, spacy_model, text_socket, socket_type="client")
+    #vad = VAD_Text_to_Speech(silero_model, utils, whisper_model, spacy_model)
     vad.listen()

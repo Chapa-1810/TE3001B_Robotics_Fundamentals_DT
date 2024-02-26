@@ -5,7 +5,7 @@ class Robot {
   ArrayList<String> coords;
   int start_node = 6;
   
-  String path = "C:/Users/alexi/OneDrive/Escritorio/Semestre 6/TE3001B_Robotics_Fundamentals_DT/letters.json";
+  String path = "letters.json";
   JSONObject json;
   
   float scale, x_scaling_factor;

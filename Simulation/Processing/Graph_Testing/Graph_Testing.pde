@@ -179,11 +179,11 @@ void mouseDragged(){
 }
 
  void loadShapes(){
-    base = loadShape("C:/Users/alexi/Downloads/drive-download-20240222T014058Z-001/r5.obj");
-    shoulder = loadShape("C:/Users/alexi/Downloads/drive-download-20240222T014058Z-001/r1.obj");
-    upArm = loadShape("C:/Users/alexi/Downloads/drive-download-20240222T014058Z-001/r2.obj");
-    loArm = loadShape("C:/Users/alexi/Downloads/drive-download-20240222T014058Z-001/r3.obj");
-    end = loadShape("C:/Users/alexi/Downloads/drive-download-20240222T014058Z-001/r4.obj");
+    base = loadShape("r5.obj");
+    shoulder = loadShape("r1.obj");
+    upArm = loadShape("r2.obj");
+    loArm = loadShape("r3.obj");
+    end = loadShape("r4.obj");
     
     shoulder.disableStyle();
     upArm.disableStyle();
