@@ -12,7 +12,7 @@ class Graph {
 
   String[] headers = {"a", "b", "c", "d", "e", "f", "g1", "g2", "h", "i", "j", "k", "l", "m"};
   
-   public Graph() {
+  public Graph() {
     this.scale = 0;
     this.nodes = new ArrayList<Node>();
     this.set = new HashSet<String>();
@@ -89,58 +89,12 @@ class Graph {
     return edges;
   }
   
-   public void DFS(int start_x, int start_y){
-    boolean visited[] = {false, false, false, false, false, false, false, false, false}; 
-     
-    this.resetCopySet();
-    this.traverseDFS(6 , visited, start_x, start_y);
-  }
-
-  public void traverseDFS(int start, boolean[] visited, int curr_x, int curr_y) {
-    visited[start] = true;
-    for (int i = 0; i < this.nodes.get(start).neighbours.size(); i++) {
-      int next = this.nodes.get(start).neighbours.get(i);
-      
-      int sm_node = next < start ? next : start;
-      int bg_node = next > start ? next : start;
-      
-      if (!visited[next] || this.copy_set.contains(sm_node + ", " + bg_node)) {
-        this.copy_set.remove(sm_node + ", " + bg_node);
-        int diff = start - next;
-        System.out.print(" " + start + " -> " + next + " ");
-        //int prev_x = curr_x, prev_y = curr_y;
-        if (abs(diff) == 3) curr_y += (abs(diff) / diff) * scale;
-        else if (abs(diff) == 1) curr_x += (abs(diff) / diff) * scale/x_scaling_factor;
-        else if (abs(diff) == 4) {
-          if (start < next) {
-            curr_y+=scale;
-            curr_x+=scale/x_scaling_factor;
-          } else {
-            curr_y-=scale;
-            curr_x-=scale/x_scaling_factor;
-          }
-        } else {
-          if (start < next) {
-            curr_y+=scale;
-            curr_x-=scale/x_scaling_factor;
-          } else {
-            curr_y-=scale;
-            curr_x+=scale/x_scaling_factor;
-          }
-        }
-        //draw(prev_x, prev_y, curr_x, curr_y, face);
-        this.traverseDFS(next, visited, curr_x, curr_y);
-      }
-    }
-  }
-  
   public void printAdjcList(){
     System.out.println(" ");
     for (int i = 0; i < amount_nodes; i++){
       this.nodes.get(i).printAdjcList();
     }
   }
-  
   
   // Constrain, node a must be smaller than node b
   public void addEdge(int node_a, int node_b) {

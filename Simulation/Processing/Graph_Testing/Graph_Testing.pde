@@ -1,10 +1,16 @@
-ArrayList<Graph> graphs;
+ //ArrayList<Graph> graphs;
+
+Robot robot_;
 
 // ArrayList<string>
-String path = "C:/Users/alexi/OneDrive/Escritorio/Semestre 6/TE3001B_Robotics_Fundamentals_DT/letters.json";
+//String path = "C:/Users/alexi/OneDrive/Escritorio/Semestre 6/TE3001B_Robotics_Fundamentals_DT/letters.json";
 
-JSONObject json;
+//JSONObject json;
 void setup(){
+  size(1200, 800, OPENGL);
+  robot_ = new Robot();
+  
+  /*
   graphs = new ArrayList<Graph>(26);
   json = loadJSONObject(path);
   
@@ -27,7 +33,7 @@ void setup(){
     System.out.println(graphs.size());
   }
   
-  /*
+  
   graphs = new ArrayList<Graph>();
   
   graphs.add(new Graph(1));
@@ -50,13 +56,9 @@ void setup(){
 }
 
 void draw(){
-  String palabra = "Hola ";
-  for (int i = 0; i < 26; i++){
-    Graph curr_graph = new Graph();
-    curr_graph = graphs.get(i);
-    System.out.print(str(char(i + 'A')) + " ");
-    curr_graph.DFS(0,0);
-    System.out.println(" " + "Finished");
-  }
-  System.out.println("------------------------------------------------------");
+  // esperar a palabra de dani
+  String phrase = "Alexis";
+  int face = 0;
+  
+  robot_.writePhrase(phrase, face);
 }
