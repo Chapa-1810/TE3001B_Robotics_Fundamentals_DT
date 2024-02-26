@@ -68,7 +68,7 @@ class Robot {
       if (!visited[next] || curr_graph.copy_set.contains(sm_node + ", " + bg_node)) { // Checamos si fue visitado o si le conexion entre nodos ya se hizo (SET<String>)
         curr_graph.copy_set.remove(sm_node + ", " + bg_node); // ELIMINAMOS CONEXION EN EL SET
         int diff = start - next;
-        //System.out.print(" " + start + " -> " + next + " ");
+        System.out.print(" " + start + " -> " + next + " ");
         float next_x = curr_x, next_y = curr_y;
         
         // Calculo logico de nuevas cordenadas (x,y) para el siguiente nodo
@@ -114,9 +114,9 @@ class Robot {
     
     for (int i =0 ; i < phrase.length(); i++){
       if (phrase.charAt(i) != ' '){
-        //System.out.print(phrase.charAt(i) + " ");
+        System.out.print(phrase.charAt(i) + " ");
         DFS(int(phrase.charAt(i) - 'A'), x, y);
-        //System.out.println(" ");
+        System.out.println(" ");
       } else {
          coords.add(" ");
       }

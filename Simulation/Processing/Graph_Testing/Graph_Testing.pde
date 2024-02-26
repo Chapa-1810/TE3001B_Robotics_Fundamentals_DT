@@ -1,3 +1,5 @@
+ import processing.net.*;
+ 
  //ArrayList<Graph> graphs;
 PShape base, shoulder, upArm, loArm, end;
 float rotX, rotY;
@@ -19,10 +21,10 @@ int face = 0;
 Robot robot_ = null;
 boolean flag = true;
 
-// ArrayList<string>
-//String path = "C:/Users/alexi/OneDrive/Escritorio/Semestre 6/TE3001B_Robotics_Fundamentals_DT/letters.json";
+Server server;
+Client client;
 
-//JSONObject json;
+int dataIn; 
 
 void IK(){
   // Calculate inverse kinematics for robot joints 
@@ -46,7 +48,7 @@ void setTime(){
 }
 
 void writePos(ArrayList<String> coords, int j, int face){
-  if (j == coords.size() - 1){
+  if (j >= coords.size() - 1){
     flag = true;
     return;
   } else if (coords.get(j) == " ") return;
@@ -61,7 +63,7 @@ void writePos(ArrayList<String> coords, int j, int face){
   int f_index = 0;
   for (int i = 0; i < curr_coords.length(); i++){
     if (curr_coords.charAt(i) == ',' || curr_coords.charAt(i) == ';'){
-      System.out.print(dummy + ";  ");
+      //System.out.print(dummy + ";  ");
       p_coords[f_index++] = Float.parseFloat(dummy);
       dummy = "";
       continue;
@@ -70,7 +72,7 @@ void writePos(ArrayList<String> coords, int j, int face){
     dummy += curr_coords.charAt(i);
   }
   
-  System.out.println("---------");
+  //System.out.println("---------");
   
   float curr_x = p_coords[0], curr_y = p_coords[1], next_x = p_coords[2], next_y = p_coords[3];
   
@@ -84,24 +86,31 @@ void setup(){
   loadShapes();
   robot_ = new Robot();
   coords = new ArrayList<String>();
+
+   // Start a server on port 65432
+  server = new Server(this, 65432);
+  println("Server started on port 65432");
 }
 
 void draw(){
-   // esperar a palabra de dani
-    
-   if (flag){
-     System.out.println("------------------------------");
-     String phrase = "M L";
+   // Wait to recieve information from socket
+   //if (myClient.available() > 0) { 
+   //   dataIn = myClient.read(); 
+   //} 
+   if ((client = server.available()) != null && flag) {
+     //System.out.println("------------------------------");
+     String phrase = client.readString();
+     println("Received: " + phrase);
      face = 0;
      index = 0;
      robot_.coords.clear();
      robot_.writePhrase(phrase);
-     for (String ss : robot_.coords) System.out.println(ss + " "); 
-     System.out.println("------------------------------");
+     //for (String ss : robot_.coords) System.out.println(ss + " "); 
+     //System.out.println("------------------------------");
      flag = false;
    }
-   
-   writePos(robot_.coords, index++, face);
+   if (robot_.coords.size() > 0)
+     writePos(robot_.coords, index++, face);
    
    
    background(32);
@@ -124,7 +133,7 @@ void draw(){
    translate(width/2,height/2);
    rotateX(rotX);
    rotateY(-rotY);
-   scale(-8);
+   scale(-2);
    
    for (int i=0; i < Xsphere.length; i++) {
      pushMatrix();
