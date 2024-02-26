@@ -13,8 +13,12 @@ float[] Xsphere = new float[999];
 float[] Ysphere = new float[999];
 float[] Zsphere = new float[999];
 
+int cubeSize = 100;
+int cubePosZ = -50;
+
 ArrayList<Float> draw_coords_x = new ArrayList<Float>();
 ArrayList<Float> draw_coords_y = new ArrayList<Float>();
+ArrayList<Boolean> draw_coords_flag = new ArrayList<Boolean>();
 
 ArrayList<String> coords;
 int index = 0;
@@ -49,57 +53,67 @@ void setTime(){
   millisOld = (float)millis()/1000;
 }
 
-/*void writePos(ArrayList<String> coords, int j, int face){
-  if (j >= coords.size() - 1){
-    flag = true;
-    return;
-  } else if (coords.get(j) == " ") return;
-  
-  
-  IK();
-  setTime();
-  String curr_coords = coords.get(j);
-  
-  float[] p_coords = {0,0,0,0};
-  String dummy = "";
-  int f_index = 0;
-  for (int i = 0; i < curr_coords.length(); i++){
-    if (curr_coords.charAt(i) == ',' || curr_coords.charAt(i) == ';'){
-      //System.out.print(dummy + ";  ");
-      p_coords[f_index++] = Float.parseFloat(dummy);
-      dummy = "";
-      continue;
-    }
-    
-    dummy += curr_coords.charAt(i);
-  }
-  
-  //System.out.println("---------");
-  
-  float curr_x = p_coords[0], curr_y = p_coords[1], next_x = p_coords[2], next_y = p_coords[3];
-  
-  posX = curr_x * 20;
-  posZ = -curr_y * 10;
-  
-}*/
-
 void writePos(int j, int face){
   IK();
   setTime();
-  posX = draw_coords_x.get(j) * 10 - 70;
-  posZ = draw_coords_y.get(j) * 10;
+
+  float posDX = -draw_coords_x.get(j)*10 + 100;
+  float posDY = -draw_coords_y.get(j)*10;
+  
+  switch(face){
+    case 1:
+      posY = posDX;
+      posX = posDY;
+      posZ = -cubeSize/2 + cubePosZ*2;
+    break;
+    case 2:
+      posY = posDX;
+      posZ = posDY + cubePosZ;
+      posX = cubeSize/2;
+    break;
+    case 3:
+      posX = posDX;
+      posZ = posDY + cubePosZ;
+      posY = cubeSize/2;
+    break;
+    case 4:
+      posY = posDX;
+      posZ = posDY + cubePosZ;
+      posX = -cubeSize/2;
+    break;
+    case 5:
+      posX = posDX;
+      posZ = posDY + cubePosZ;
+      posY = -cubeSize/2;
+    break;
+    case 6:
+      println("Nel");
+    break;
+  }
 }
 
-void linearInterpolation(ArrayList<Float> x_coords, ArrayList<Float> y_coords, int stepsBetweenPoints){
-  float x0, y0, x1, y1;
-  for (int i = 0; i < x_coords.size() - 1; i++){
-    x0 = x_coords.get(i);
-    y0 = y_coords.get(i);
-    x1 = x_coords.get(i+1);
-    y1 = y_coords.get(i+1);
+void linearInterpolation(ArrayList<FloatList> coords, int stepsBetweenPoints){
+  float x0, y0, x1, y1, next_x, next_y;
+  for (int i = 0; i < robot_.num_coords.size(); i++){
+    x0 = coords.get(i).get(0);
+    y0 = coords.get(i).get(1);
+    x1 = coords.get(i).get(2);
+    y1 = coords.get(i).get(3);
     for (int j = 0; j < stepsBetweenPoints; j++){
       draw_coords_x.add(x0 + (x1 - x0) * j / stepsBetweenPoints);
       draw_coords_y.add(y0 + (y1 - y0) * j / stepsBetweenPoints);
+      draw_coords_flag.add(true);
+    }
+    if (i < coords.size() - 1){
+      next_x = coords.get(i+1).get(0);
+      next_y = coords.get(i+1).get(1);
+      if (next_x != x1 && next_y != y1){
+        for (int j = 0; j < stepsBetweenPoints; j++){
+          draw_coords_x.add(x1 + (next_x - x1) * j / stepsBetweenPoints);
+          draw_coords_y.add(y1 + (next_y - y1) * j / stepsBetweenPoints);
+          draw_coords_flag.add(false);
+        }
+      }
     }
   }
 }
@@ -112,7 +126,7 @@ void setup(){
   coords = new ArrayList<String>();
 
    // Start a server on port 65432
-  server = new Server(this, 65432);
+  //server = new Server(this, 65432);
   println("Server started on port 65432");
 }
 
@@ -123,9 +137,10 @@ void draw(){
    //} 
    //if (flag){//(client = server.available()) != null && flag) {
   while (flag == true){
-    if ((client = server.available()) != null && flag) {     //System.out.println("------------------------------");
-     //String data = "ROBOT;1;", phrase="";//
-     String data = client.readString(), phrase = "";
+    if(flag){
+    //if ((client = server.available()) != null && flag) {     //System.out.println("------------------------------");
+     String data = "DANNY;5;", phrase="";//
+     //String data = client.readString(), phrase = "";
      println("Received: " + data);
      
      for (int i = 0; i < data.length(); i++){
@@ -141,16 +156,15 @@ void draw(){
      //for (String ss : robot_.coords) System.out.println(ss + " "); 
      //System.out.println("------------------------------");
      flag = false;
-     for (int i = 0; i < robot_.num_coords_x.size(); i++){
-       //System.out.println(robot_.coords.get(i));
-       System.out.println(robot_.num_coords_x.get(i) + " " + robot_.num_coords_y.get(i));
-       System.out.println("------");
+     for (int i = 0; i < robot_.num_coords.size(); i++){
+       for (int j = 0; j < robot_.num_coords.get(i).size(); j++){
+         System.out.print(robot_.num_coords.get(i).get(j));
+         System.out.print(" ");
+       }
+        System.out.println();
      }
      // wait 10000 ms
-     linearInterpolation(robot_.num_coords_x, robot_.num_coords_y, 5);
-     for (int i = 0; i < draw_coords_x.size(); i++){
-       System.out.println(draw_coords_x.get(i) + " " + draw_coords_y.get(i));
-     }
+     linearInterpolation(robot_.num_coords, 5);
      Xsphere = new float[draw_coords_x.size()];
       Ysphere = new float[draw_coords_x.size()];
       Zsphere = new float[draw_coords_x.size()];
@@ -192,7 +206,15 @@ void draw(){
      pushMatrix();
      translate(-Ysphere[i], -Zsphere[i]-11, -Xsphere[i]);
      fill (#D003FF, 200);
-     sphere (2);
+     int sphereSize = 2;
+     int ball_index = i - (draw_coords_x.size() - index);
+     if (ball_index<0){
+      ball_index = draw_coords_x.size() + ball_index;
+     }
+     if (draw_coords_flag.get(ball_index)==false){
+      sphereSize = 0;
+     }
+     sphere(sphereSize);
      popMatrix();
     }
     
