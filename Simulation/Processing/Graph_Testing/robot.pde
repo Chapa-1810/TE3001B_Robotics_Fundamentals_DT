@@ -110,7 +110,7 @@ class Robot {
     // inicio caja (x,y)
     int x = 0, y = 0;
     // FONT SIZE DETERMINADO POR TAMANIO DE FRASE Y ESPACIO DISPONIBLE
-    scale = 1; x_scaling_factor = 3;
+    scale = 1; x_scaling_factor = 1;
     
     for (int i =0 ; i < phrase.length(); i++){
       if (phrase.charAt(i) != ' '){

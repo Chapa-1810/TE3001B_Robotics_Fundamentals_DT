@@ -99,9 +99,16 @@ void draw(){
    //} 
    if ((client = server.available()) != null && flag) {
      //System.out.println("------------------------------");
-     String phrase = client.readString();
-     println("Received: " + phrase);
-     face = 0;
+     String data = client.readString(), phrase = "";
+     println("Received: " + data);
+     
+     for (int i = 0; i < data.length(); i++){
+       if (data.charAt(i) == ';'){
+         face =  data.charAt(i+1) - '0';
+         break;
+       }
+       phrase += data.charAt(i);
+     }
      index = 0;
      robot_.coords.clear();
      robot_.writePhrase(phrase);

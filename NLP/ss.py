@@ -9,7 +9,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 
 # Send data to the server
-s.sendall(b'HELLO SERVER')
+s.sendall(b'HELLO;5;')
 
 # Receive data from the server
 #data = s.recv(1024)
