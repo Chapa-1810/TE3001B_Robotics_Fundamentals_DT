@@ -126,7 +126,7 @@ void setup(){
   coords = new ArrayList<String>();
 
    // Start a server on port 65432
-  //server = new Server(this, 65432);
+  server = new Server(this, 65432);
   println("Server started on port 65432");
 }
 
@@ -136,11 +136,10 @@ void draw(){
    //   dataIn = myClient.read(); 
    //} 
    //if (flag){//(client = server.available()) != null && flag) {
-  while (flag == true){
-    if(flag){
-    //if ((client = server.available()) != null && flag) {     //System.out.println("------------------------------");
-     String data = "WALTER WHITE;3;", phrase="";//
-     //String data = client.readString(), phrase = "";
+    //if(flag){
+    if ((client = server.available()) != null && flag) {     //System.out.println("------------------------------");
+     //String data = "WALTER WHITE;3;", phrase="";//
+     String data = client.readString(), phrase = "";
      println("Received: " + data);
      
      for (int i = 0; i < data.length(); i++){
@@ -151,8 +150,12 @@ void draw(){
        phrase += data.charAt(i);
      }
      index = 0;
-     robot_.coords.clear();
+     robot_.cleanCords();
      robot_.writePhrase(phrase);
+     
+      draw_coords_x.clear();
+      draw_coords_y.clear();
+      draw_coords_flag.clear();
      //for (String ss : robot_.coords) System.out.println(ss + " "); 
      //System.out.println("------------------------------");
      flag = false;
@@ -168,17 +171,22 @@ void draw(){
      Xsphere = new float[draw_coords_x.size()];
       Ysphere = new float[draw_coords_x.size()];
       Zsphere = new float[draw_coords_x.size()];
-   }
-  }
-  
-  if (index > draw_coords_x.size() - 1){
-    flag = false;
-    index = 0;
+   } else if (draw_coords_x.size() == 0){
     return;
+   }
+
+  if (index >= draw_coords_x.size() - 1 && flag == false){
+    System.out.println("End of the movement");
+    flag = true;
   }
 
   writePos(index, face);
-  index++;
+
+  if (flag == false){
+    index++;
+  }
+
+
 
    background(255);
    smooth();

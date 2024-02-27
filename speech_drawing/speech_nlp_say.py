@@ -15,8 +15,16 @@ import sys
 import spacy
 from unidecode import unidecode
 
+import speech_recognition as sr
+from gtts import gTTS
+import os
+import time
+import playsound
+import pyttsx3
+
+say_voice = "com.apple.speech.synthesis.voice.paulina"
 silero_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad', force_reload=False)
-WHISPER_MODEL = "base"
+WHISPER_MODEL = "small"
 spacy_model_name = "es_dep_news_trf"
 HOSTNAME = '127.0.0.1'  # The server's hostname or IP address
 PORT = 65432      # The port used by the server
@@ -24,13 +32,15 @@ PORT = 65432      # The port used by the server
 
 class VAD_Text_to_Speech:
     
-    def __init__(self, silero_model,silero_utils, whisper_model, spacy_model, text_socket=None, socket_type=None) -> None:
+    def __init__(self, silero_model,silero_utils, whisper_model, spacy_model, say_engine=None, text_socket=None, socket_type=None) -> None:
         self.silero_model = silero_model
         self.whisper_model = whisper_model
         self.spacy_model = spacy_model
         self.utils = silero_utils
         self.socket = text_socket
         self.socket_type = socket_type
+        self.say_engine = say_engine
+        self.speaking = False
         if self.socket is not None:
             if socket_type == "client":
                 self.socket["socket"].connect((self.socket["hostname"], self.socket["port"]))
@@ -55,8 +65,8 @@ class VAD_Text_to_Speech:
 
         audio = pyaudio.PyAudio()
         
-        sample_time = 500 #ms
-        self.num_samples = int(SAMPLE_RATE * sample_time / 1000)
+        self.sample_time = 750 #ms
+        self.num_samples = int(SAMPLE_RATE * self.sample_time / 1000)
 
         self.stream = audio.open(format=FORMAT,
                             channels=CHANNELS,
@@ -65,7 +75,14 @@ class VAD_Text_to_Speech:
                             frames_per_buffer=CHUNK,
                             )
     
-    
+    def speak(self,text):
+        self.speaking = True
+        tts = gTTS(text=text, lang='es')
+        filename = 'voice.mp3'
+        tts.save(filename)
+        playsound.playsound(filename)
+        self.speaking = False
+
 
     def listen(self):
         # Taken from utils_vad.py
@@ -88,13 +105,19 @@ class VAD_Text_to_Speech:
 
         frames_to_record = 50
 
-        print("Started listening")
         
+        print("Saying...")
+        self.speak("¿Qué palabra quieres escribir?")
+        print("Started listening")
         recorded_audio = []
 
+        while (self.speaking):
+            print()
+            # wait for the speaking to finish
+        
         while True:
             audio_chunk = self.stream.read(self.num_samples)
-            
+        
             # in case you want to save the audio later
             data.append(audio_chunk)
             
@@ -104,13 +127,13 @@ class VAD_Text_to_Speech:
             
             # get the confidences and add them to the list to plot them later
             confidence = self.silero_model(torch.from_numpy(audio_float32), 16000).item()
-            if confidence > 0.75:
+            if confidence > 0.75 and not self.speaking:
                 if len(recorded_audio) == 0:
                     print("Started recording")
                 recorded_audio.append(audio_chunk)
             else:
-                if len(recorded_audio) > 0:
-                    if len(recorded_audio) < 3:
+                if len(recorded_audio) > 0 and not self.speaking:
+                    if len(recorded_audio) * self.sample_time < 1000:
                         print("Recording too short")
                         recorded_audio = []
                         continue
@@ -140,22 +163,37 @@ class VAD_Text_to_Speech:
             target_word = target_word.text.upper()
             target_word = unidecode(target_word)
             target_face = target_face.text.upper()
-            msg = bytes(f"{target_word};{target_face};", "utf-8")
-            if self.socket_type == "server":
-                try:
-                    self.client.sendall(msg)
-                except socket.error as e:
-                    self.client.close()
-                    self.socket["socket"].listen(1)
-                    self.client, self.addr = self.socket["socket"].accept()
-                    print(f"Connected to {self.addr}")
-                    self.client.sendall(msg)
-                pass
+            if target_face in ["1", "2", "3", "4", "5", "6"]:
+                # ask if face is numeric
+                msg = bytes(f"{target_word};{target_face};", "utf-8")
+                self.speak(f"Voy a escribir {target_word} en la cara {target_face}")
+                if self.socket_type == "server":
+                    try:
+                        self.client.sendall(msg)
+                    except socket.error as e:
+                        self.client.close()
+                        self.socket["socket"].listen(1)
+                        self.client, self.addr = self.socket["socket"].accept()
+                        print(f"Connected to {self.addr}")
+                        self.client.sendall(msg)
+                    pass
+                else:
+                    self.socket["socket"].sendall(msg)
             else:
-                self.socket["socket"].sendall(msg)
+                self.speak(f"La cara {target_face} no es un número")
     
     def get_target_word_and_face(self, text):
+        caras = { 
+            "uno": 1,
+            "dos": 2,
+            "tres": 3,
+            "cuatro": 4,
+            "cinco": 5,
+            "seis": 6
+        }
+        # Process whole documents
         doc = self.spacy_model(text)
+
         verb_pos = 0
         face_num = 0
         target_num = 0
@@ -172,8 +210,14 @@ class VAD_Text_to_Speech:
         for pos, token in enumerate(doc[verb_pos:]):
             if token.is_digit or token.like_num:
                 face_num = pos
+                
+        target_word = doc[verb_pos+target_num]
+        target_face = doc[verb_pos+face_num]
+        
+        if target_face.text in caras:
+            target_face = caras[target_face.text]
 
-        return doc[verb_pos+target_num], doc[face_num+verb_pos]
+        return target_word, target_face
 
 if __name__ == "__main__" :
     text_socket = {
@@ -181,8 +225,10 @@ if __name__ == "__main__" :
         "port": PORT,
         "socket": socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     }
+    say_engine = pyttsx3.init()
+    say_engine.setProperty('voice', say_voice)
     spacy_model = spacy.load(spacy_model_name)
     whisper_model = whisper.load_model(WHISPER_MODEL)
-    vad = VAD_Text_to_Speech(silero_model, utils, whisper_model, spacy_model, text_socket, socket_type="client")
+    vad = VAD_Text_to_Speech(silero_model, utils, whisper_model, spacy_model, say_engine=say_engine, text_socket=text_socket, socket_type="client")
     #vad = VAD_Text_to_Speech(silero_model, utils, whisper_model, spacy_model)
     vad.listen()
