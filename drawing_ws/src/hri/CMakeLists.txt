@@ -25,4 +25,11 @@ if(BUILD_TESTING)
 endif()
 
 ament_python_install_package(${PROJECT_NAME})
+
+install(PROGRAMS
+  hri/nlp.py
+  hri/hello.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()
