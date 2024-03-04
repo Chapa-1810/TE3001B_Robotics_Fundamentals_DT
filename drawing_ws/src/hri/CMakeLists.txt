@@ -28,7 +28,7 @@ ament_python_install_package(${PROJECT_NAME})
 
 # Install Python executables
 install(PROGRAMS
-  hri/whisper.py
+  hri/speech_to_text.py
   hri/hello-world.py
   DESTINATION lib/${PROJECT_NAME}
 )

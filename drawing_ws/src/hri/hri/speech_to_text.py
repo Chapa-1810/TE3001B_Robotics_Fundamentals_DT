@@ -19,11 +19,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 
 say_voice = "com.apple.speech.synthesis.voice.paulina"
-silero_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad', force_reload=False)
-WHISPER_MODEL = "small"
-spacy_model_name = "es_dep_news_trf"
-HOSTNAME = '127.0.0.1'  # The server's hostname or IP address
-PORT = 65432      # The port used by the server
+
 
 
 class VAD_Text_to_Speech(Node):
@@ -36,6 +32,7 @@ class VAD_Text_to_Speech(Node):
         self.speaking = False
         
         # Initialize the node
+        print("Initializing VAD_Text_to_Speech")
         super().__init__('vad_text_to_speech')
         self.text_publisher_ = self.create_publisher(String, 'whisper_text', 10)
         
@@ -55,6 +52,9 @@ class VAD_Text_to_Speech(Node):
                             input=True,
                             frames_per_buffer=CHUNK,
                             )
+        self.get_logger().info('VAD_Text_to_Speech node is running')    
+        
+        self.listen()
     
     def speak(self,text):
         self.speaking = True
@@ -93,7 +93,7 @@ class VAD_Text_to_Speech(Node):
             # wait for the speaking to finish
         
         while True:
-            audio_chunk = self.stream.read(self.num_samples)
+            audio_chunk = self.stream.read(self.num_samples, exception_on_overflow = False)
         
             # in case you want to save the audio later
             data.append(audio_chunk)
@@ -129,13 +129,20 @@ class VAD_Text_to_Speech(Node):
         result = self.whisper_model.transcribe(audio_np, language="es", fp16=torch.cuda.is_available())
         text = result['text'].strip()
         print(f"Whisper: {text}")
-        self.text_publisher_.publish(text)
+        text_msg = String()
+        text_msg.data = text
+        self.text_publisher_.publish(text_msg)
 
 if __name__ == "__main__" :
     say_engine = pyttsx3.init()
     say_engine.setProperty('voice', say_voice)
+    print("Loading Silero VAD...")
+    silero_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad', force_reload=False)
+    WHISPER_MODEL = "small"
     whisper_model = whisper.load_model(WHISPER_MODEL)
+    print("Whisper initialized, starting rclpy...")
     rclpy.init()
+    print("rclpy initialized, starting VAD...")
     vad = VAD_Text_to_Speech(silero_model, utils, whisper_model, say_engine=say_engine)
     rclpy.spin(vad)
     vad.destroy_node()
