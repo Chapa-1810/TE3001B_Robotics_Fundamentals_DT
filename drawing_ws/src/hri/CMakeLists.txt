@@ -28,7 +28,8 @@ ament_python_install_package(${PROJECT_NAME})
 
 install(PROGRAMS
   hri/nlp.py
-  hri/hello.py
+  hri/speech_to_text.py
+  hri/speak.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
