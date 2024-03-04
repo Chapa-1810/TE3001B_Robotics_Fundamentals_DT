@@ -1,7 +1,7 @@
 # TE3001B_Robotics_Fundamentals_DT
 
-Para lo del brazo en ros2 hay que instalar esta mierda
+Pa las deps:
 
 ```bash
-sudo apt-get install ros-humble-ament-cmake-python
+source ./drawing_ws/src/hri/scripts/install_deps.bash
 ```
