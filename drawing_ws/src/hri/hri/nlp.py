@@ -72,7 +72,7 @@ class NLP(Node):
 
     for pos, token in enumerate(specs):
       # Num or like num
-      if token.pos_ == "ADJ":
+      if token.pos_ == "ADJ" or token.pos_ == "NOUN":
         #self.get_logger().info('Hit ADJ "%s"' % token.text)
         if token.text.lower().strip() == "largo":
           for subpos, subtoken in enumerate(specs[pos:]):
@@ -92,16 +92,15 @@ class NLP(Node):
                 else:
                   width = float(number_dictionary[subtoken.text])
                 break
-      elif token.pos_ == "NOUN" and token.text.lower().strip() == "radio":
-        #self.get_logger().info('Hit Radius "%s"' % token.text)
-        for subpos, subtoken in enumerate(specs[pos:]):
-          self.get_logger().info('Subtoken: "%s"' % subtoken.text)
-          if subtoken.pos_ == "NUM" or subtoken.like_num:
-            if subtoken.is_digit:
-              radius = float(subtoken.text)
-            else:
-              radius = float(number_dictionary[subtoken.text])
-            break
+        elif token.text.lower().strip() == "radio":
+          for subpos, subtoken in enumerate(specs[pos:]):
+            self.get_logger().info('Subtoken: "%s"' % subtoken.text)
+            if subtoken.pos_ == "NUM" or subtoken.like_num:
+                if subtoken.is_digit:
+                  radius = float(subtoken.text)
+                else:
+                  radius = float(number_dictionary[subtoken.text])
+                break
     for pos, token in enumerate(predicate):
       self.get_logger().info('Token: "%s", POS: "%s"' % (token.text, token.pos_))
 
