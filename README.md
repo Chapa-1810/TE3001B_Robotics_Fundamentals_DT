@@ -2,7 +2,6 @@
 
 Pa las deps:
 
-
 ```bash
 source ./drawing_ws/src/hri/scripts/install_deps.bash
 ```
