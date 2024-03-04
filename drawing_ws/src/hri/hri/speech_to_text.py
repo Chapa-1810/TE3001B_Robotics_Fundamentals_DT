@@ -24,9 +24,9 @@ class VAD_Text_to_Speech(Node):
         # Initialize the node
         print("Initializing VAD_Text_to_Speech")
         super().__init__('vad_text_to_speech')
-        self.text_publisher_ = self.create_publisher(String, 'whisper_text', 10)
-        self.speak_publisher_ = self.create_publisher(String, 'speak_text', 10)
-        self.speaking_sub = self.create_subscription(Bool, 'speaking', self.speaking_callback, 10)
+        self.text_publisher_ = self.create_publisher(String, 'hri/whisper_text', 10)
+        self.speak_publisher_ = self.create_publisher(String, 'hri/speak_text', 10)
+        self.speaking_sub = self.create_subscription(Bool, 'hri/speaking', self.speaking_callback, 10)
         self.speaking = False
         
         FORMAT = pyaudio.paInt16

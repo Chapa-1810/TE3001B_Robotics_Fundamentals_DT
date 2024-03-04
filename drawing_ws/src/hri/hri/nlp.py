@@ -19,7 +19,7 @@ figures = {
 class NLP(Node):
   def __init__(self):
     super().__init__('nlp')
-    self.create_subscription(String, 'hri/stt', self.text_callback, 10)
+    self.create_subscription(String, 'hri/whisper_text', self.text_callback, 10)
     self.publisher = self.create_publisher(Int16, 'hri/figure', 10)
 
     self.nlp = spacy.load('es_dep_news_trf')

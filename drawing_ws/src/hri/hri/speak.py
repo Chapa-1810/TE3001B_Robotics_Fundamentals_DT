@@ -9,8 +9,8 @@ from pygame import mixer
 class Speak(Node):
     def __init__(self) -> None:
         super().__init__('speak')
-        self.speaking_sub = self.create_subscription(String, 'speak_text', self.listener_callback, 10)
-        self.speaking_pub = self.create_publisher(Bool, 'speaking', 10)
+        self.speaking_sub = self.create_subscription(String, 'hri/speak_text', self.listener_callback, 10)
+        self.speaking_pub = self.create_publisher(Bool, 'hri/speaking', 10)
         self.speaking_pub.publish(Bool(data=False))
         self.get_logger().info('Speak node is running')
         
