@@ -8,33 +8,26 @@ torchaudio.set_audio_backend("soundfile")
 import pyaudio
 from threading import Thread
 import whisper
-from unidecode import unidecode
-
-from gtts import gTTS
-import playsound
-import pyttsx3
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
-
-say_voice = "com.apple.speech.synthesis.voice.paulina"
-
-
+from std_msgs.msg import String, Bool
 
 class VAD_Text_to_Speech(Node):
     
-    def __init__(self, silero_model,silero_utils, whisper_model, say_engine=None) -> None:
+    def __init__(self, silero_model,silero_utils, whisper_model) -> None:
         self.silero_model = silero_model
         self.whisper_model = whisper_model
         self.utils = silero_utils
-        self.say_engine = say_engine
         self.speaking = False
         
         # Initialize the node
         print("Initializing VAD_Text_to_Speech")
         super().__init__('vad_text_to_speech')
         self.text_publisher_ = self.create_publisher(String, 'whisper_text', 10)
+        self.speak_publisher_ = self.create_publisher(String, 'speak_text', 10)
+        self.speaking_sub = self.create_subscription(Bool, 'speaking', self.speaking_callback, 10)
+        self.speaking = False
         
         FORMAT = pyaudio.paInt16
         CHANNELS = 1
@@ -55,16 +48,17 @@ class VAD_Text_to_Speech(Node):
         self.get_logger().info('VAD_Text_to_Speech node is running')    
         
         self.listen()
+        
+    def speaking_callback(self, msg):
+        self.speaking = msg.data
+        return
     
-    def speak(self,text):
-        self.speaking = True
-        tts = gTTS(text=text, lang='es')
-        filename = 'voice.mp3'
-        tts.save(filename)
-        playsound.playsound(filename)
-        self.speaking = False
-
-
+    def speak(self, text):
+        text_msg = String()
+        text_msg.data = text
+        self.speak_publisher_.publish(text_msg)
+        return
+    
     def listen(self):
         # Taken from utils_vad.py
         def validate(self,model,
@@ -83,11 +77,8 @@ class VAD_Text_to_Speech(Node):
             return sound
         data = []
         
-        print("Saying...")
-        self.speak("¿Qué palabra quieres escribir?")
-        print("Started listening")
         recorded_audio = []
-
+        self.speak("I'm listening")
         while (self.speaking):
             print()
             # wait for the speaking to finish
@@ -104,12 +95,12 @@ class VAD_Text_to_Speech(Node):
             
             # get the confidences and add them to the list to plot them later
             confidence = self.silero_model(torch.from_numpy(audio_float32), 16000).item()
-            if confidence > 0.75:
+            if confidence > 0.75 and not self.speaking:
                 if len(recorded_audio) == 0:
                     print("Started recording")
                 recorded_audio.append(audio_chunk)
             else:
-                if len(recorded_audio) > 0:
+                if len(recorded_audio) > 0 and not self.speaking:
                     if len(recorded_audio) * self.sample_time < 1000:
                         print("Recording too short")
                         recorded_audio = []
@@ -134,8 +125,6 @@ class VAD_Text_to_Speech(Node):
         self.text_publisher_.publish(text_msg)
 
 if __name__ == "__main__" :
-    say_engine = pyttsx3.init()
-    say_engine.setProperty('voice', say_voice)
     print("Loading Silero VAD...")
     silero_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad', force_reload=False)
     WHISPER_MODEL = "small"
@@ -143,7 +132,7 @@ if __name__ == "__main__" :
     print("Whisper initialized, starting rclpy...")
     rclpy.init()
     print("rclpy initialized, starting VAD...")
-    vad = VAD_Text_to_Speech(silero_model, utils, whisper_model, say_engine=say_engine)
+    vad = VAD_Text_to_Speech(silero_model, utils, whisper_model)
     rclpy.spin(vad)
     vad.destroy_node()
     rclpy.shutdown()
