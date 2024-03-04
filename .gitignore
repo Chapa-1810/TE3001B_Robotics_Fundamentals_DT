@@ -3,3 +3,7 @@ jacobian_motion/simulation_ws/install
 jacobian_motion/simulation_ws/log
 *.mp3
 *.pyc
+*.mp3
+*/build
+*/install
+*/log
