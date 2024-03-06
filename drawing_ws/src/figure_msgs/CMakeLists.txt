@@ -29,6 +29,7 @@ endif()
 rosidl_generate_interfaces(${PROJECT_NAME}
 	"msg/Figure.msg"
 	"msg/PoseStampedArray.msg"
+  "srv/PathGenerator.srv"
 	DEPENDENCIES std_msgs geometry_msgs
 )
 
