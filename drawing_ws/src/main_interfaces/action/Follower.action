@@ -1,0 +1,5 @@
+PoseStampedArray path
+---
+bool completed
+---
+int32 pose_index
