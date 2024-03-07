@@ -13,15 +13,18 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 # find_package(figure_msgs REQUIRED)
 find_package(main_interfaces REQUIRED)
 
 add_executable(main_engine src/main_engine.cpp)
 ament_target_dependencies(main_engine main_interfaces rclcpp rclcpp_action std_msgs) # add main_interfaces
+add_executable(path_action_server src/path_action_server.cpp)
+ament_target_dependencies(path_action_server main_interfaces rclcpp rclcpp_action geometry_msgs) # add main_interfaces
 
 install(TARGETS
   main_engine
+  path_action_server
   DESTINATION lib/${PROJECT_NAME})
-
 
 ament_package()

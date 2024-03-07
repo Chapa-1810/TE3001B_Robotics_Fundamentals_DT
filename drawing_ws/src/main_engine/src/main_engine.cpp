@@ -3,7 +3,6 @@
 #include <bits/stdc++.h>
 #include <chrono>
 #include <string>
-#include <sstream>
 #include <future>
 
 #include "rclcpp/rclcpp.hpp"
@@ -18,9 +17,6 @@
 
 using path_service = main_interfaces::srv::PathGenerator;
 using action_service = main_interfaces::action::Follower;
-using GoalHandle = rclcpp_action::ClientGoalHandle<action_service>;
-
-using namespace std::chrono_literals;
 
 rclcpp::TimerBase::SharedPtr timer_;
 rclcpp::Publisher<std_msgs::msg::String>::SharedPtr talker_pub_;
