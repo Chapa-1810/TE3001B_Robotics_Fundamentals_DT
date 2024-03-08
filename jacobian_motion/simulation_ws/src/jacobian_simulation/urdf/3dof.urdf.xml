@@ -14,18 +14,20 @@
   <link name="base_link">
     <visual>
       <geometry>
-        <box size="0.0 0.0 0.0"/>
+        <cylinder radius="0.5" length="0.05"/>
       </geometry>
-      <material name="blue"/>
+      <origin xyz="0 0 0"/>
+      <material name="black"/>
     </visual>
   </link>
 
   <link name="arm_base">
     <visual>
       <geometry>
-        <cylinder radius="0.25" length="0.05" />
+        <box size="0.1 0.1 0.01" />
       </geometry>
-      <material name="black"/>
+      <origin xyz="0 0.45 0.025"/>
+      <material name="white"/>
     </visual>
   </link>
 
@@ -33,7 +35,7 @@
   <joint name="joint1" type="revolute">
     <parent link="base_link"/>
     <child link="arm_base"/>
-    <origin xyz="0 0 0.025"/>
+    <origin xyz="0 0.45 0.025"/>
     <axis xyz="0 0 1"/>
     <limit lower="-3.14" upper="3.14" effort="1000.0" velocity="0.5"/>
   </joint>
@@ -52,7 +54,7 @@
     <parent link="arm_base"/>
     <child link="link1"/>
     <origin xyz="0.0 0 0.05"/>
-    <limit lower="-3.14" upper="3.14" effort="1000.0" velocity="0.5"/>
+    <limit lower="-1.57" upper="1.57" effort="1000.0" velocity="0.5"/>
   </joint>
 
   <link name="link2">
@@ -69,8 +71,9 @@
     <parent link="link1"/>
     <child link="link2"/>
     <origin xyz="0 0 0.4"/>
-    <limit lower="-3.14" upper="3.14" effort="1000.0" velocity="0.5"/>
+    <limit lower="-1.57" upper="1.57" effort="1000.0" velocity="0.5"/>
   </joint>
+  
 
 
 
