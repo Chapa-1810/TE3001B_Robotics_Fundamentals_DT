@@ -15,12 +15,13 @@ rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr poses_pub_;
 rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr goal_sub_;
 rclcpp_action::Server<action_service>::SharedPtr action_server_;
 std::shared_ptr<rclcpp::Node> node_;
-std_msgs::msg::Bool::SharedPtr goal_;
+
+bool flag = true;
 
 void goal_callback(const std_msgs::msg::Bool::SharedPtr msg)
 {
   RCLCPP_INFO(node_->get_logger(), "Received subcription from goal topic");
-  goal_ = msg;
+  flag = msg->data;
 }
 
 void execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<action_service>> goal_handle)
@@ -33,7 +34,7 @@ void execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<action_servic
   sequence = 1;
   auto result = std::make_shared<action_service::Result>();
 
-  for (long unsigned int i = 0; (i < goal->path.size) && rclcpp::ok(); i++) {
+  for (long unsigned int i = 0; (i < goal->path.size) && rclcpp::ok();) {
     // Check if there is a cancel request
     if (goal_handle->is_canceling()) {
       result->completed = false;
@@ -48,9 +49,9 @@ void execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<action_servic
     goal_handle->publish_feedback(feedback);  
     RCLCPP_INFO(node_->get_logger(), "Publish feedback");
 
-    //if (!goal_->data) continue;
+    if (!flag) continue;
 
-    sequence++;
+    sequence++, i++;
 
     loop_rate.sleep();
   }
@@ -89,11 +90,9 @@ int main( int argc, char* argv[] )
   rclcpp::init(argc, argv);
   rclcpp::NodeOptions options = rclcpp::NodeOptions();
   node_ = rclcpp::Node::make_shared("path_action_server", options);
-  
-  //goal_->data = false;
 
-  poses_pub_ = node_->create_publisher<geometry_msgs::msg::PoseStamped>("pose_suscriber", 10);
-  //goal_sub_ = node_->create_subscription<std_msgs::msg::Bool>("goal_check", 10, std::bind(goal_callback, std::placeholders::_1));
+  poses_pub_ = node_->create_publisher<geometry_msgs::msg::PoseStamped>("/pose_pub", 10);
+  goal_sub_ = node_->create_subscription<std_msgs::msg::Bool>("/goal_check", 1000, std::bind(goal_callback, std::placeholders::_1));
 
   action_server_ = rclcpp_action::create_server<action_service>(node_, "jacobian_follower", 
             std::bind(handle_goal, std::placeholders::_1, std::placeholders::_2), 
@@ -102,7 +101,7 @@ int main( int argc, char* argv[] )
 
   RCLCPP_INFO(node_->get_logger(), "Initialized action server");
 
-  rclcpp::spin(node_);
+  rclcpp::spin(node_);//
 
   rclcpp::shutdown();
 

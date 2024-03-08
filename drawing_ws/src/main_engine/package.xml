@@ -11,7 +11,6 @@
   <depend>rclcpp</depend>
   <depend>rclcpp_action</depend>
   <depend>std_msgs</depend>
-  <!-- <depend>figure_msgs</depend> -->
   <depend>main_interfaces</depend>
 
   <test_depend>ament_lint_auto</test_depend>
