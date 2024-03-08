@@ -45,7 +45,7 @@ void execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<action_servic
   sequence = 0;
   auto result = std::make_shared<action_service::Result>();
 
-  for (long unsigned int i = 0; (i < sizeof(goal->path.poses)) && rclcpp::ok(); ++i) {
+  for (long unsigned int i = 0; (i < goal->path.size) && rclcpp::ok(); ++i) {
     // Check if there is a cancel request
     if (goal_handle->is_canceling()) {
       result->completed = false;
@@ -75,7 +75,7 @@ void execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<action_servic
 
 rclcpp_action::GoalResponse handle_goal( const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const action_service::Goal> goal)
 {
-  int size = sizeof(goal->path.poses);
+  int size = goal->path.size;
   RCLCPP_INFO(node_->get_logger(), "Received goal request with %d poses", size);
   (void)uuid;
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
@@ -90,8 +90,7 @@ rclcpp_action::CancelResponse handle_cancel(const std::shared_ptr<rclcpp_action:
 
 void handle_accepted(const std::shared_ptr<rclcpp_action::ServerGoalHandle<action_service>> goal_handle)
 {
-  // this needs to return quickly to avoid blocking the executor, so spin up a new thread
-  std::thread{std::bind(execute, std::placeholders::_1), goal_handle}.detach();
+  execute(goal_handle);
 }
 
 int main( int argc, char* argv[] )
@@ -104,10 +103,12 @@ int main( int argc, char* argv[] )
   // matlab_sub = node_->create_subscription<geometry_msgs::msg::JointNOSE>("matlab_sub", 10, std::bind(matlab_callback, std::placeholders::_1));
   poses_pub_ = node_->create_publisher<geometry_msgs::msg::PoseStamped>("poses_pub", 10);
 
-  action_server_ = rclcpp_action::create_server<action_service>(node_, "follower", 
-            std::bind(&handle_goal, std::placeholders::_1, std::placeholders::_2), 
-            std::bind(&handle_cancel, std::placeholders::_1), 
-            std::bind(&handle_accepted, std::placeholders::_1));
+  action_server_ = rclcpp_action::create_server<action_service>(node_, "jacobian_follower", 
+            std::bind(handle_goal, std::placeholders::_1, std::placeholders::_2), 
+            std::bind(handle_cancel, std::placeholders::_1), 
+            std::bind(handle_accepted, std::placeholders::_1));
+
+  RCLCPP_INFO(node_->get_logger(), "Initialized action server");
 
   rclcpp::spin(node_);
 
