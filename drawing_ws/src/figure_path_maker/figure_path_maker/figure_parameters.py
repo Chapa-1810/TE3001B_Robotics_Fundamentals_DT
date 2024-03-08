@@ -298,10 +298,8 @@ class FigureParameters:
   # Building the poses for the triangular
   def buildtriangular(self):
     # Check for errors
-    if(self.length == 0):
-      self.length = self.radius * sqrt(3)
     if(self.length <= 0):
-      return "Invalid length or radius"
+      return "Invalid length"
     if(self.width <= 0):
       return "Invalid width"
     if(self.n <= 0):
@@ -444,7 +442,47 @@ class FigureParameters:
     return ""
 
   # Building the poses for the tetrahedron
-  
+  def buildtetaedro(self):
+    # Check for errors
+    if(self.length <= 0):
+      return "Invalid length"
+    if(self.width == 0):
+      self.width = self.length
+    if(self.width <= 0):
+      return "Invalid width"
+    if(self.n <= 0):
+      return "Invalid detail"
+    # Initialize variables
+    x = self.xO
+    y = self.yO
+    z = self.zO
+    angle = 0
+    deltaL = self.length/self.n
+    #deltaW = self.width/(self.n * floor(self.width/self.length))
+    # Front face
+    x = self.xO + self.length/2
+    y = self.yO - self.length/2
+    z = self.zO - self.length/2
+    self.appendPoststamp(x, y, z)
+    for i in np.arange(0, 3, 1):
+      angle += 120
+      # Traverse the length
+      for j in np.arange(deltaL, self.length + deltaL, deltaL):
+        x += self.length * cos(angle)
+        y += self.length * sin(angle)
+        self.appendPoststamp(x, y, z)
+      # Traverse the width
+      xT = x
+      yT = y
+      x = self.xO
+      y = self.yO
+      z += self.width
+      self.appendPoststamp(x, y, z)
+      x = xT
+      y = yT
+      z -= self.width
+      self.appendPoststamp(x, y, z)
+    return ""
 
 
   # Building the given pose
