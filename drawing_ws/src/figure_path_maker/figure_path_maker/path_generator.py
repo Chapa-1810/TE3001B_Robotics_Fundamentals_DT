@@ -3,13 +3,13 @@ from rclpy.node import Node
 from figure_msgs.msg import PoseStampedArray
 from figure_msgs.srv import PathGenerator
 from geometry_msgs.msg import PoseStamped
-#from figure_params import buildPoses
+#from figure_parameters import FigureParameters
 from math import cos, sin, pi
 import numpy as np
 
 class PathGen(Node):
   def __init__(self):
-    super().__init__('pathgen')
+    super().__init__('pathGen')
     self.srv = self.create_service(PathGenerator, 'PathGenerator', self.path_generation_callback)
     self.get_logger().info('Initialized path generator node')
   
@@ -24,20 +24,21 @@ class PathGen(Node):
     self.zO = 0.0 # z center of the figure
     # Generating the path
     self.figure_poses = PoseStampedArray()
-    #builtFlag = self.buildPoses(request.figure.figure_id)
+    builtFlag = self.buildPoses(request.figure.figure_id)
 
-    #Hardcode
-    builtFlag = True
-    posestamp = PoseStamped()
-    posestamp.pose.position.x = float(19)
-    posestamp.pose.position.y = float(80)
-    posestamp.pose.position.z = float(5)
-    self.figure_poses.poses.append(posestamp)
+    # Hardcode
+    #builtFlag = True
+    #posestamp = PoseStamped()
+    #posestamp.pose.position.x = float(19)
+    #posestamp.pose.position.y = float(80)
+    #posestamp.pose.position.z = float(5)
+    #self.figure_poses.poses.append(posestamp)
+    
 
     # 
     if builtFlag:
-      response = self.figure_poses
-      self.get_logger().info('Path generated: %f, %f, %f' % (response.poses[0].pose.position.x,response.poses[0].pose.position.y,response.poses[0].pose.position.z))
+      response.poses.poses = self.figure_poses.poses
+      self.get_logger().info('Path generated')
       return response
     else:
       self.get_logger().info('Path not generated')
