@@ -25,21 +25,23 @@ class PathGen(Node):
     # Generating the path
     self.figure_poses = PoseStampedArray()
     #builtFlag = self.buildPoses(request.figure.figure_id)
-    
+
+    #Hardcode
     builtFlag = True
     posestamp = PoseStamped()
-    posestamp.pose.position.x = float(1)
-    posestamp.pose.position.y = float(1)
-    posestamp.pose.position.z = float(1)
+    posestamp.pose.position.x = float(19)
+    posestamp.pose.position.y = float(80)
+    posestamp.pose.position.z = float(5)
     self.figure_poses.poses.append(posestamp)
 
+    # 
     if builtFlag:
       response = self.figure_poses
-      self.get_logger().info('Path generated')
-      return response.poses
+      self.get_logger().info('Path generated: %f, %f, %f' % (response.poses[0].pose.position.x,response.poses[0].pose.position.y,response.poses[0].pose.position.z))
+      return response
     else:
       self.get_logger().info('Path not generated')
-      return response.poses
+      return response
   
   # Building the poses for the different figures
   def buildPoses(self, value):
