@@ -5,11 +5,13 @@ from figure_msgs.srv import PathGenerator
 from geometry_msgs.msg import PoseStamped
 #from figure_params import buildPoses
 from math import cos, sin, pi
+import numpy as np
 
 class PathGen(Node):
   def __init__(self):
     super().__init__('pathgen')
-    self.srv = self.create_service(PathGenerator, 'Path_Generation', self.path_generation_callback)
+    self.srv = self.create_service(PathGenerator, 'PathGenerator', self.path_generation_callback)
+    self.get_logger().info('Initialized path generator node')
   
   def path_generation_callback(self, request, response):
     # Obtaining the figure parameters
@@ -17,19 +19,27 @@ class PathGen(Node):
     self.length = request.figure.length # length of the figure
     self.width = request.figure.width # width of the figure
     self.n = 8 # number of points per face
-    self.xO = 0 # x center of the figure
-    self.yO = 0 # y center of the figure
-    self.zO = 0 # z center of the figure
+    self.xO = 0.0 # x center of the figure
+    self.yO = 0.0 # y center of the figure
+    self.zO = 0.0 # z center of the figure
     # Generating the path
-    self.poses = []
-    builtFlag = self.buildPoses(request.figure.figure_id)
+    self.figure_poses = PoseStampedArray()
+    #builtFlag = self.buildPoses(request.figure.figure_id)
+    
+    builtFlag = True
+    posestamp = PoseStamped()
+    posestamp.pose.position.x = float(1)
+    posestamp.pose.position.y = float(1)
+    posestamp.pose.position.z = float(1)
+    self.figure_poses.poses.append(posestamp)
+
     if builtFlag:
-      response.poses = self.poses
+      response = self.figure_poses
       self.get_logger().info('Path generated')
-      return response
+      return response.poses
     else:
       self.get_logger().info('Path not generated')
-      return response
+      return response.poses
   
   # Building the poses for the different figures
   def buildPoses(self, value):
@@ -69,7 +79,7 @@ class PathGen(Node):
       return False
     # Circle in the xy plane
     z = self.zO
-    for i in range(0, 2*pi, delta):
+    for i in np.arange(0, int(2*pi), delta):
       x = self.xO + self.radius * cos(i)
       y = self.yO + self.radius * sin(i)
       self.appendPoststamp(x, y, z)
@@ -78,7 +88,7 @@ class PathGen(Node):
     self.appendPoststamp(x, y, z)
     # Circle in the xz plane
     y = 0
-    for i in range(0, 2*pi, delta):
+    for i in np.arange(0, 2*pi, delta):
       x = self.xO + self.radius * cos(i)
       z = self.zO + self.radius * cos(i)
       self.appendPoststamp(x, y, z)
@@ -87,7 +97,7 @@ class PathGen(Node):
     self.appendPoststamp(x, y, z)
     # Circle in the yz plane
     x = 0
-    for i in range(0, 2*pi, delta):
+    for i in np.arange(0, 2*pi, delta):
       y = self.yO + self.radius * sin(i)
       z = self.zO + self.radius * cos(i)
       self.appendPoststamp(x, y, z)
@@ -115,16 +125,16 @@ class PathGen(Node):
     y = self.yO - self.length/2
     z = self.zO + self.length/2
     self.appendPoststamp(x, y, z)
-    for i in range(delta, self.length + delta, delta):
+    for i in np.arange(delta, self.length + delta, delta):
       y += i
       self.appendPoststamp(x, y, z)
-    for i in range(delta, self.length + delta, delta):
+    for i in np.arange(delta, self.length + delta, delta):
       z -= i
       self.appendPoststamp(x, y, z)
-    for i in range(delta, self.length + delta, delta):
+    for i in np.arange(delta, self.length + delta, delta):
       y -= i
       self.appendPoststamp(x, y, z)
-    for i in range(delta, self.length + delta, delta):
+    for i in np.arange(delta, self.length + delta, delta):
       z += i
       self.appendPoststamp(x, y, z)
     # Right face
@@ -132,13 +142,13 @@ class PathGen(Node):
     y = self.yO + self.length/2
     z = self.zO + self.length/2
     self.appendPoststamp(x, y, z)
-    for i in range(delta, self.length + delta, delta):
+    for i in np.arange(delta, self.length + delta, delta):
       x -= i
       self.appendPoststamp(x, y, z)
-    for i in range(delta, self.length + delta, delta):
+    for i in np.arange(delta, self.length + delta, delta):
       z -= i
       self.appendPoststamp(x, y, z)
-    for i in range(delta, self.length + delta, delta):
+    for i in np.arange(delta, self.length + delta, delta):
       x += i
       self.appendPoststamp(x, y, z)
     # Back face
@@ -146,13 +156,13 @@ class PathGen(Node):
     y = self.yO + self.length/2
     z = self.zO + self.length/2
     self.appendPoststamp(x, y, z)
-    for i in range(delta, self.length + delta, delta):
+    for i in np.arange(delta, self.length + delta, delta):
       y -= i
       self.appendPoststamp(x, y, z)
-    for i in range(delta, self.length + delta, delta):
+    for i in np.arange(delta, self.length + delta, delta):
       z -= i
       self.appendPoststamp(x, y, z)
-    for i in range(delta, self.length + delta, delta):
+    for i in np.arange(delta, self.length + delta, delta):
       y += i
       self.appendPoststamp(x, y, z)
     # Left face
@@ -160,24 +170,23 @@ class PathGen(Node):
     y = self.yO - self.length/2
     z = self.zO + self.length/2
     self.appendPoststamp(x, y, z)
-    for i in range(delta, self.length + delta, delta):
+    for i in np.arange(delta, self.length + delta, delta):
       x += i
       self.appendPoststamp(x, y, z)
     z -= self.length
     self.appendPoststamp(x, y, z)
-    for i in range(delta, self.length + delta, delta):
+    for i in np.arange(delta, self.length + delta, delta):
       x -= i
       self.appendPoststamp(x, y, z)
     return True
 
   # Building the given pose
-  def appendPoststamp(self, x, y, z):
+  def appendPoststamp(self, x_p, y_p, z_p):
     posestamp = PoseStamped()
-    posestamp.pose.position.x = x
-    posestamp.pose.position.y = y
-    posestamp.pose.position.z = z
-    posestamp.header.Timestamp = self.get_clock().now().to_msg()
-    self.poses.append(posestamp)
+    posestamp.pose.position.x = float(x_p)
+    posestamp.pose.position.y = float(y_p)
+    posestamp.pose.position.z = float(z_p)
+    self.figure_poses.poses.append(posestamp)
     return
 
 def main(args=None):
