@@ -15,7 +15,7 @@ class PathGen(Node):
     figure.radius = request.figure.radius # radius of the figure
     figure.length = request.figure.length # length of the figure
     figure.width = request.figure.width # width of the figure
-    figure.n = 8 # detail (number of points per face)
+    figure.n = 0 # detail (number of points per edge)
     figure.xO = 0.0 # x center of the figure
     figure.yO = 0.0 # y center of the figure
     figure.zO = 0.0 # z center of the figure
