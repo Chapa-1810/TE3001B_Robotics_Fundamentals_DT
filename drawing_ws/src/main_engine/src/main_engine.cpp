@@ -32,7 +32,7 @@ std::shared_ptr<rclcpp::Node> node_;
 bool action_service_done_ = true;
 bool service_done_ = true;
 bool received_figure_ = false;
-bool DEBUG = false;
+bool DEBUG = true;
 
 void talker_callback(const std_msgs::msg::Bool::SharedPtr msg){
   if (bool(msg->data)) {
@@ -96,10 +96,10 @@ void service_callback(rclcpp::Client<path_service>::SharedFuture future){
 
 
 void timer_callback(){
-  if (!received_figure_ && !action_service_done_) return;
+  if (/*!received_figure_ &&*/ !action_service_done_) return;
 
   RCLCPP_INFO(node_->get_logger(), "Sending request to  server");
-  auto path_result = client_->async_send_request(path_request, std::bind(service_callback, std::placeholders::_1));
+  //auto path_result = client_->async_send_request(path_request, std::bind(service_callback, std::placeholders::_1));
 
   if (!service_done_){
     RCLCPP_INFO(node_->get_logger(), "Service already done");
@@ -130,7 +130,7 @@ void timer_callback(){
     path.size = 10;
     action_goal.path = path;
   } else {
-    action_goal.path = path_result->get().path;
+    // action_goal.path = path_result.get()->path;
   }
 
   auto send_goal_options = rclcpp_action::Client<action_service>::SendGoalOptions();
@@ -150,21 +150,21 @@ int main(int argc, char * argv[]){
   path_request = std::make_shared<path_service::Request>();
   action_goal = action_service::Goal();
 
-  talker_pub_ = node_->create_publisher<std_msgs::msg::String>("/sayText", 1000);
-  talker_sub_ = node_->create_subscription<std_msgs::msg::Bool>("/speaking", 10, std::bind(talker_callback, std::placeholders::_1));
-  figure_sub_ = node_->create_subscription<main_interfaces::msg::Figure>("/figure", 10, std::bind(figure_callback, std::placeholders::_1));
+  talker_pub_ = node_->create_publisher<std_msgs::msg::String>("hri/speak_text", 1000);
+  //talker_sub_ = node_->create_subscription<std_msgs::msg::Bool>("hri/speaking", 10, std::bind(talker_callback, std::placeholders::_1));
+  //figure_sub_ = node_->create_subscription<main_interfaces::msg::Figure>("hri/figure", 10, std::bind(figure_callback, std::placeholders::_1));
 
-  client_ = node_->create_client<path_service>("path_generator");
+  client_ = node_->create_client<path_service>("PathGenerator");
   action_client_ = rclcpp_action::create_client<action_service>(node_, "jacobian_follower");
 
-  while(!action_client_->wait_for_action_server(std::chrono::milliseconds(500)) || !client_->wait_for_service(std::chrono::milliseconds(500))){
-    if (!rclcpp::ok()){
-      RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
-      rclcpp::shutdown();
-      return 0;
-    }
-    RCLCPP_INFO(node_->get_logger(), "Waiting for service to appear...");
-  }
+  // while(!action_client_->wait_for_action_server(std::chrono::milliseconds(500)) || !client_->wait_for_service(std::chrono::milliseconds(500))){
+  //   if (!rclcpp::ok()){
+  //     RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
+  //     rclcpp::shutdown();
+  //     return 0;
+  //   }
+  //   RCLCPP_INFO(node_->get_logger(), "Waiting for service to appear...");
+  // }
 
   RCLCPP_INFO(node_->get_logger(), "Initialized client");
 
