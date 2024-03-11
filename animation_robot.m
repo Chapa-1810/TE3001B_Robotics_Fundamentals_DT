@@ -1,0 +1,51 @@
+rob = importrobot('triple_3dof.urdf');
+hom = homeConfiguration(rob);
+
+s = struct('JointName',{'L_joint1','L_joint2','L_joint3','R_joint1','R_joint2','R_joint3','U_joint1','U_joint2','U_joint3'}, 'JointPosition',{0,0,0,0,0,0,0,0,0});
+
+jvelold = [0,0,0,0,0,0,0,0,0];
+jpos = [0;0;0;0;0;0;0;0;0];
+
+for i = 0:0.1:10
+    velx = 1;
+    vely = 0;
+    velz = 0;
+    u = 0;
+    v = 0;
+    w = 0;
+    
+
+    jvel = pinv(geometricJacobian(rob,s,"L_link2"))*[velx;vely;velz;u;v;w]
+
+    
+    jpos = 0.1*0.5.*(jvel + jvelold) + jpos;
+    %jpos(2) = 0;
+    %jpos(3) = 0;
+    %{
+    jpos(1) = lksd(1);
+    jpos(2) = lksd(2);
+    jpos(3) = lksd(3);
+    jpos(4) = lksd(4);
+    jpos(5) = lksd(5);
+    jpos(6) = lksd(6);
+    jpos(7) = lksd(7);
+    jpos(8) = lksd(8);
+    jpos(9) = lksd(9);
+    %}
+	jvelold = jvel;
+
+    s(1).JointPosition = jpos(1);
+    s(2).JointPosition = jpos(2);
+    s(3).JointPosition = jpos(3);
+    s(4).JointPosition = jpos(4);
+    s(5).JointPosition = jpos(5);
+    s(6).JointPosition = jpos(6);
+    s(7).JointPosition = jpos(7);
+    s(8).JointPosition = jpos(8);
+    s(9).JointPosition = jpos(9);
+    %s(1).JointPosition = 0;
+    %s(2).JointPosition = sin(i);
+    %s(3).JointPosition = sin(i);
+    show(rob, s,'PreservePlot',false,'Frames','off');
+    drawnow;
+end
