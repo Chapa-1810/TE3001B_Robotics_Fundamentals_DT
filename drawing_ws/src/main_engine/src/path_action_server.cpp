@@ -5,35 +5,23 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "main_interfaces/action/follower.hpp"
-// #include "geometry_msgs/msg/twist.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
-//#include "geometry_msgs/msg/JointState.hpp"
+#include "std_msgs/msg/bool.hpp"
 
 using action_service = main_interfaces::action::Follower;
 
 rclcpp::TimerBase::SharedPtr timer_;
-// rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr matlab_pub_;
-// rclcpp::Subscription<geometry_msgs::msg::JointNOSE>::SharedPtr matlab_sub_;
 rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr poses_pub_;
+rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr goal_sub_;
 rclcpp_action::Server<action_service>::SharedPtr action_server_;
 std::shared_ptr<rclcpp::Node> node_;
+std_msgs::msg::Bool::SharedPtr goal_;
 
-bool USING_MATLAB = false;
-
-
-// void matlab_callback(const geometry_msgs::msg::JointNOSE::SharedPtr msg){
-//   if (USING_MATLAB) {
-//     RCLCPP_INFO(node_->get_logger(), "Received pose from matlab");
-//     geometry_msgs::msg::Twist twist;
-//     twist.linear.x = msg->x;
-//     twist.linear.y = msg->y;
-//     twist.linear.z = msg->z;
-//     twist.angular.x = msg->roll;
-//     twist.angular.y = msg->pitch;
-//     twist.angular.z = msg->yaw;
-//     matlab_pub_->publish(twist);
-//   }
-// }
+void goal_callback(const std_msgs::msg::Bool::SharedPtr msg)
+{
+  RCLCPP_INFO(node_->get_logger(), "Received subcription from goal topic");
+  goal_ = msg;
+}
 
 void execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<action_service>> goal_handle)
 {
@@ -42,10 +30,10 @@ void execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<action_servic
   const auto goal = goal_handle->get_goal();
   auto feedback = std::make_shared<action_service::Feedback>();
   auto & sequence = feedback->pose_index;
-  sequence = 0;
+  sequence = 1;
   auto result = std::make_shared<action_service::Result>();
 
-  for (long unsigned int i = 0; (i < goal->path.size) && rclcpp::ok(); ++i) {
+  for (long unsigned int i = 0; (i < goal->path.size) && rclcpp::ok(); i++) {
     // Check if there is a cancel request
     if (goal_handle->is_canceling()) {
       result->completed = false;
@@ -55,11 +43,14 @@ void execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<action_servic
     }
 
     poses_pub_->publish(goal->path.poses[i]);
-    sequence++;
 
     // Publish feedback
-    goal_handle->publish_feedback(feedback);
+    goal_handle->publish_feedback(feedback);  
     RCLCPP_INFO(node_->get_logger(), "Publish feedback");
+
+    //if (!goal_->data) continue;
+
+    sequence++;
 
     loop_rate.sleep();
   }
@@ -98,10 +89,11 @@ int main( int argc, char* argv[] )
   rclcpp::init(argc, argv);
   rclcpp::NodeOptions options = rclcpp::NodeOptions();
   node_ = rclcpp::Node::make_shared("path_action_server", options);
+  
+  //goal_->data = false;
 
-  // matlab_pub = node_->create_publisher<geometry_msgs::msg::Twist>("matlab_pub", 10);
-  // matlab_sub = node_->create_subscription<geometry_msgs::msg::JointNOSE>("matlab_sub", 10, std::bind(matlab_callback, std::placeholders::_1));
-  poses_pub_ = node_->create_publisher<geometry_msgs::msg::PoseStamped>("poses_pub", 10);
+  poses_pub_ = node_->create_publisher<geometry_msgs::msg::PoseStamped>("pose_suscriber", 10);
+  //goal_sub_ = node_->create_subscription<std_msgs::msg::Bool>("goal_check", 10, std::bind(goal_callback, std::placeholders::_1));
 
   action_server_ = rclcpp_action::create_server<action_service>(node_, "jacobian_follower", 
             std::bind(handle_goal, std::placeholders::_1, std::placeholders::_2), 
