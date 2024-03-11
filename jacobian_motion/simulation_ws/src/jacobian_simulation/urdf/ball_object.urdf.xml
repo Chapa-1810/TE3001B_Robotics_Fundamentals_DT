@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<robot name="simple_serial_robot">
+    <!-- a movable ball object-->
+    <link name="ball_base">
+    </link>
+
+    <link name="ball">
+        <visual>
+            <geometry>
+                <sphere radius="0.05"/>
+            </geometry>
+            <origin xyz="0 0 0"/>
+            <material name="blue"/>
+        </visual>
+    </link>
+
+    <joint name="ball_joint" type="floating">
+        <parent link="ball_base"/>
+        <child link="ball"/>
+        <origin xyz="0 0 0"/>
+    </joint>
+</robot>
