@@ -4,19 +4,18 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 
 def generate_launch_description():
-    
     config = os.path.join(
         get_package_share_directory('reto_final'),
         'config',
         'params.yaml'
     )
+
+    print(config)
     
     signal_generator_node = Node(
         package='reto_final',
         name='signal_generator_node',
         executable='signal_generator',
-        output='screen',
-        prefix='terminator --execute',
         parameters = [config]
     )
 
@@ -25,8 +24,6 @@ def generate_launch_description():
         name='set_point_node',
         executable='set_point',
         output='screen',
-        prefix='terminator --execute',
-        parameters = [config]
     )
 
     rqt_graph_node = Node(
@@ -43,7 +40,6 @@ def generate_launch_description():
     
     l_d = LaunchDescription([signal_generator_node, set_point_node,
                              rqt_graph_node, rqt_graph_plot])
-
     
 
     return l_d

@@ -21,7 +21,6 @@ class My_Publisher(Node):
         self.signal_publisher = self.create_publisher(Float32, '/signal', 10)
         signal_timer_period = 0.05
         self.signal_timer = self.create_timer(signal_timer_period, self.signal_timer_callback)
-        # self.signal_sub = self.create_subscription(Float32, 'angular_speed', self.angularS_callback, 10)
         self.get_logger().info('Signal generator node initialized')
         self.msg_signal = Float32()
         
