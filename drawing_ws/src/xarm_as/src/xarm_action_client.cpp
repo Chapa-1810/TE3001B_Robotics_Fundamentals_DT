@@ -7,13 +7,14 @@
 #include <iostream>
 
 
-#include "xarm_as_interfaces/action/move_arm.hpp"
+#include "main_interfaces/action/move_arm.hpp"
+
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "rclcpp_components/register_node_macro.hpp"
 
-using action_service = xarm_as_interfaces::action::MoveArm;
+using action_service = main_interfaces::action::MoveArm;
 std::shared_ptr<rclcpp::Node> node_;
 rclcpp_action::Client<action_service>::SharedPtr action_client_;
 
@@ -69,27 +70,24 @@ int main(int argc, char * argv[])
       rclcpp::shutdown();
       return 0;
     }
-    RCLCPP_INFO(node_->get_logger(), "Waiting for service to appear...");
-  }
+        RCLCPP_INFO(node_->get_logger(), "Waiting for service to appear...");
+    }
     
     RCLCPP_INFO(node_->get_logger(), "Service appeared");
 
     auto goal_msg = action_service::Goal();
-    goal_msg.target_pose.position.x = 0.3;
-    goal_msg.target_pose.position.y = -0.1;
-    goal_msg.target_pose.position.z = 0.4;
+    goal_msg.target_pose.position.x = 1;
+    goal_msg.target_pose.position.y = 1;
+    goal_msg.target_pose.position.z = 1;
     goal_msg.target_pose.orientation.x = 1;
     goal_msg.target_pose.orientation.y = 0;
     goal_msg.target_pose.orientation.z = 0;
     goal_msg.target_pose.orientation.w = 0;
 
     auto send_goal_options = rclcpp_action::Client<action_service>::SendGoalOptions();
-    send_goal_options.goal_response_callback =
-      std::bind(goal_response_callback, std::placeholders::_1);
-    send_goal_options.feedback_callback =
-        std::bind(feedback_callback, std::placeholders::_1, std::placeholders::_2);
-    send_goal_options.result_callback =
-        std::bind(result_callback, std::placeholders::_1);
+    send_goal_options.goal_response_callback = std::bind(goal_response_callback, std::placeholders::_1);
+    send_goal_options.feedback_callback = std::bind(feedback_callback, std::placeholders::_1, std::placeholders::_2);
+    send_goal_options.result_callback = std::bind(result_callback, std::placeholders::_1);
     RCLCPP_INFO(node_->get_logger(), "Sending goal");
     action_client_->async_send_goal(goal_msg, send_goal_options);
     rclcpp::spin(node_);

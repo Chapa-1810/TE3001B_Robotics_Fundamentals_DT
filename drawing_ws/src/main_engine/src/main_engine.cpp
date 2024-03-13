@@ -120,7 +120,7 @@ void timer_callback(){
 
   if (DEBUG){
     auto path = main_interfaces::msg::PoseStampedArray();
-    for (int i = 0; i < 10; i++){
+    for (int i = 1; i <= 10; i++){
       geometry_msgs::msg::PoseStamped pose;
       pose.pose.position.x = i;
       pose.pose.position.y = i;
@@ -140,7 +140,7 @@ void timer_callback(){
   send_goal_options.feedback_callback = std::bind(feedback_callback, std::placeholders::_1, std::placeholders::_2);
   send_goal_options.result_callback = std::bind(result_callback, std::placeholders::_1);
   
-  auto action_result = action_client_->async_send_goal(action_goal, send_goal_options);
+  action_client_->async_send_goal(action_goal, send_goal_options);
 }
 
 int main(int argc, char * argv[]){
@@ -165,6 +165,15 @@ int main(int argc, char * argv[]){
   //   }
   //   RCLCPP_INFO(node_->get_logger(), "Waiting for service to appear...");
   // }
+
+  while(!action_client_->wait_for_action_server(std::chrono::milliseconds(500))){
+    if (!rclcpp::ok()){
+      RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
+      rclcpp::shutdown();
+      return 0;
+    }
+    RCLCPP_INFO(node_->get_logger(), "Waiting for service to appear...");
+  }
 
   RCLCPP_INFO(node_->get_logger(), "Initialized client");
 

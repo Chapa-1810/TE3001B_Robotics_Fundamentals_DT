@@ -19,6 +19,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 	"msg/PoseStampedArray.msg"
 	"srv/PathGenerator.srv"
 	"action/Follower.action"
+	"action/MoveArm.action"
 	DEPENDENCIES std_msgs geometry_msgs
 )
 

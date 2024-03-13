@@ -2,7 +2,7 @@
 #include <memory>
 #include <thread>
 
-#include "xarm_as_interfaces/action/move_arm.hpp"
+#include "main_interfaces/action/move_arm.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "rclcpp_components/register_node_macro.hpp"
@@ -15,7 +15,7 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 
-using MoveArm = xarm_as_interfaces::action::MoveArm;
+using MoveArm = main_interfaces::action::MoveArm;
 using GoalHandleMoveArm = rclcpp_action::ServerGoalHandle<MoveArm>;
 
 rclcpp_action::Server<MoveArm>::SharedPtr action_server_;

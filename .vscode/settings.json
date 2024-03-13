@@ -86,6 +86,10 @@
         "typeinfo": "cpp",
         "valarray": "cpp",
         "variant": "cpp",
-        "__nullptr": "cpp"
+        "__nullptr": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "queue": "cpp",
+        "stack": "cpp"
     }
 }
