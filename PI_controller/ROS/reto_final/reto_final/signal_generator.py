@@ -7,7 +7,7 @@ from std_msgs.msg import Float32
 
 class My_Publisher(Node):
     def __init__(self):
-        super().__init__('signal_generator_node') #Change node name as well
+        super().__init__('signal_generator_node')
         self.declare_parameters(
             namespace='',
             parameters=[
@@ -21,6 +21,7 @@ class My_Publisher(Node):
         self.signal_publisher = self.create_publisher(Float32, 'pwm_duty_cycle', 10)
         signal_timer_period = 0.05
         self.signal_timer = self.create_timer(signal_timer_period, self.signal_timer_callback)
+        self.signal_sub = self.create_subscription(Float32, 'angular_speed', self.angularS_callback, 10)
         self.get_logger().info('Signal generator node initialized')
         self.msg_signal = Float32()
         
@@ -45,6 +46,9 @@ class My_Publisher(Node):
         self.get_logger().info('Signal: {}'.format(self.msg_signal.data))
         param_time = Parameter('time_float', Parameter.Type.DOUBLE, time + 0.05) #Change time
         self.set_parameters([param_time])
+    
+    def angularS_callback(self, msg):
+        self.get_logger().info('w: {}'.format(msg.data))
         
         
 def main(args=None):
