@@ -1,3 +1,4 @@
+.vscode
 jacobian_motion/simulation_ws/build
 jacobian_motion/simulation_ws/install
 jacobian_motion/simulation_ws/log
