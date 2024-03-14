@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from figure_msgs.srv import PathGenerator
+from main_interfaces.srv import PathGenerator
 from figure_path_maker.figure_parameters import FigureParameters
 
 class PathGen(Node):
@@ -15,15 +15,15 @@ class PathGen(Node):
     figure.radius = request.figure.radius # radius of the figure
     figure.length = request.figure.length # length of the figure
     figure.width = request.figure.width # width of the figure
-    figure.n = 0 # detail (number of points per edge)
-    figure.xO = 0.0 # x center of the figure
-    figure.yO = 0.0 # y center of the figure
-    figure.zO = 0.0 # z center of the figure
+    figure.n = 1 # detail (number of points per edge)
+    figure.xO = 0.2 # x center of the figure
+    figure.yO = 0.2 # y center of the figure
+    figure.zO = 0.3 # z center of the figure
     # Generate the path
     builtFlag = figure.buildPoses(request.figure.figure_id)
     # Sending the response
     if not builtFlag:
-      response.poses.poses = figure.poses.poses
+      response.path.poses = figure.poses.poses
       self.get_logger().info('Path generated')
       return response
     else:

@@ -30,9 +30,10 @@ action_service::Goal action_goal;
 std::shared_ptr<rclcpp::Node> node_;
 
 bool action_service_done_ = true;
-bool service_done_ = true;
+bool service_done_ = false;
 bool received_figure_ = false;
-bool DEBUG = false;
+bool DEBUG_POSES = false;
+bool DEBUG_FIGURE = true;
 
 void talker_callback(const std_msgs::msg::Bool::SharedPtr msg){
   if (bool(msg->data)) {
@@ -43,7 +44,7 @@ void talker_callback(const std_msgs::msg::Bool::SharedPtr msg){
 void figure_callback(const main_interfaces::msg::Figure::SharedPtr msg){
   if (received_figure_) return;
 
-  path_request->figure = *msg; // maybe needs unreferencing &
+  path_request->figure = *msg;
   received_figure_ = true;
 
   RCLCPP_INFO(node_->get_logger(), "Recieved figure");
@@ -83,10 +84,11 @@ void result_callback(const rclcpp_action::ClientGoalHandle<action_service>::Wrap
     RCLCPP_INFO(node_->get_logger(), ss.str().c_str());
 }
 
-void service_callback(rclcpp::Client<path_service>::SharedFuture future){
+void service_callback(const rclcpp::Client<path_service>::SharedFuture future){
   auto status = future.wait_for(std::chrono::milliseconds(100));
   if (status == std::future_status::ready) {
     RCLCPP_INFO(node_->get_logger(), "Service finished");
+    action_goal.path = future.get()->path;
     service_done_ = true;
   } else {
     RCLCPP_INFO(node_->get_logger(), "Service In-Progress...");
@@ -96,10 +98,10 @@ void service_callback(rclcpp::Client<path_service>::SharedFuture future){
 
 
 void timer_callback(){
-  if (!received_figure_ && !action_service_done_) return;
-
-  RCLCPP_INFO(node_->get_logger(), "Sending request to  server");
+  if (!received_figure_ || !action_service_done_) return;
+  
   auto path_result = client_->async_send_request(path_request, std::bind(service_callback, std::placeholders::_1));
+  RCLCPP_INFO(node_->get_logger(), "Sending request to  server");
 
   if (!service_done_){
     RCLCPP_INFO(node_->get_logger(), "Service already done");
@@ -116,9 +118,8 @@ void timer_callback(){
   received_figure_ = false;
 
 
-  RCLCPP_INFO(node_->get_logger(), "Sending goal to action server");
 
-  if (DEBUG){
+  if (DEBUG_POSES){
     auto path = main_interfaces::msg::PoseStampedArray();
     for (int i = 1; i <= 10; i++){
       geometry_msgs::msg::PoseStamped pose;
@@ -129,9 +130,9 @@ void timer_callback(){
     }
     path.size = 10;
     action_goal.path = path;
-  } else {
-    action_goal.path = path_result.get()->path;
-  }
+  } 
+
+  RCLCPP_INFO(node_->get_logger(), "Debug");
 
   auto send_goal_options = rclcpp_action::Client<action_service>::SendGoalOptions();
   
@@ -140,6 +141,7 @@ void timer_callback(){
   send_goal_options.feedback_callback = std::bind(feedback_callback, std::placeholders::_1, std::placeholders::_2);
   send_goal_options.result_callback = std::bind(result_callback, std::placeholders::_1);
   
+  RCLCPP_INFO(node_->get_logger(), "Sending goal to action server");
   action_client_->async_send_goal(action_goal, send_goal_options);
 }
 
@@ -176,6 +178,16 @@ int main(int argc, char * argv[]){
   }
 
   RCLCPP_INFO(node_->get_logger(), "Initialized client");
+
+  if (DEBUG_FIGURE){
+    main_interfaces::msg::Figure data;
+    data.figure_id = 2;
+    data.length = 0.2;
+    data.radius = 0.0;
+    data.width = 0;
+    path_request->figure = data;
+    received_figure_ = true;
+  }
 
   timer_ = node_->create_wall_timer(std::chrono::milliseconds(500), timer_callback);
   

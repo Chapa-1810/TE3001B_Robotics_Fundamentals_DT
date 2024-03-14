@@ -1,4 +1,4 @@
-from figure_msgs.msg import PoseStampedArray
+from main_interfaces.msg import PoseStampedArray
 from geometry_msgs.msg import PoseStamped
 from math import cos, sin, pi, floor, sqrt
 import numpy as np
@@ -9,7 +9,7 @@ class FigureParameters:
     self.radius = 0.0
     self.length = 0.0
     self.width = 0.0
-    self.n = 0
+    self.n = 1
     self.xO = 0.0
     self.yO = 0.0
     self.zO = 0.0
@@ -44,7 +44,7 @@ class FigureParameters:
     # Check for errors
     if(self.radius <= 0):
       return "Invalid radius"
-    if(self.n <= 0):
+    if(self.n < 0):
       return "Invalid detail"
     # Initialize variables
     x = self.xO
@@ -86,7 +86,7 @@ class FigureParameters:
       self.length = self.width
     if(self.length <= 0):
       return "Invalid length or width"
-    if(self.n <= 0):
+    if(self.n < 0):
       return "Invalid detail"
     # Initialize variables
     x = self.xO
@@ -160,7 +160,7 @@ class FigureParameters:
       return "Invalid length"
     if(self.width <= 0):
       return "Invalid width"
-    if(self.n <= 0):
+    if(self.n < 0):
       return "Invalid detail"
     # Initialize variables
     x = self.xO
@@ -237,7 +237,7 @@ class FigureParameters:
       return "Invalid radius"
     if(self.width <= 0):
       return "Invalid width or length"
-    if(self.n <= 0):
+    if(self.n < 0):
       return "Invalid detail"
     # Initialize variables
     x = self.xO
@@ -267,7 +267,7 @@ class FigureParameters:
       return "Invalid length or radius"
     if(self.width <= 0):
       return "Invalid width"
-    if(self.n <= 0):
+    if(self.n < 0):
       return "Invalid detail"
     # Initialize variables
     x = self.xO
@@ -302,7 +302,7 @@ class FigureParameters:
       return "Invalid length"
     if(self.width <= 0):
       return "Invalid width"
-    if(self.n <= 0):
+    if(self.n < 0):
       return "Invalid detail"
     # Initialize variables
     x = self.xO
@@ -340,7 +340,7 @@ class FigureParameters:
       return "Invalid radius"
     if(self.width <= 0):
       return "Invalid width or length"
-    if(self.n <= 0):
+    if(self.n < 0):
       return "Invalid detail"
     # Initialize variables
     x = self.xO
@@ -374,7 +374,7 @@ class FigureParameters:
       return "Invalid length"
     if(self.width <= 0):
       return "Invalid width"
-    if(self.n <= 0):
+    if(self.n < 0):
       return "Invalid detail"
     # Initialize variables
     x = self.xO
@@ -450,7 +450,7 @@ class FigureParameters:
       self.width = self.length
     if(self.width <= 0):
       return "Invalid width"
-    if(self.n <= 0):
+    if(self.n < 0):
       return "Invalid detail"
     # Initialize variables
     x = self.xO
