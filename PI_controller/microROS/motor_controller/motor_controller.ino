@@ -9,7 +9,7 @@
 #define RESOLUTION 8
 
 #define SPEED_MEASURING_TIMEOUT 10
-#define SPEED_PUBLISHER_TIMEOUT 100
+#define SPEED_PUBLISHER_TIMEOUT 10
 
 
 #include <micro_ros_arduino.h>
@@ -40,6 +40,7 @@ const char* subscriber_topic = "setpoint";
 
 float motor_current_speed = 0.0;
 float current_pwm = 0.0;
+bool motor_direction = 0;
 
 unsigned long encoderTicks = 0;
 volatile int prevEncoderState = 0;
@@ -60,7 +61,7 @@ void speed_publisher_timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 {  
   RCLC_UNUSED(last_call_time);
   if (timer != NULL) {
-    pub_msg.data = motor_current_speed;
+    pub_msg.data = motor_direction ? motor_current_speed : -motor_current_speed;
     RCSOFTCHECK(rcl_publish(&speed_publisher, &pub_msg, NULL));
   }
 }
@@ -70,7 +71,7 @@ void speed_measuring_callback(rcl_timer_t * timer, int64_t last_call_time)
 {
   RCLC_UNUSED(last_call_time);
   if (timer != NULL) {
-    motor_current_speed = ((encoderTicks/2100.0)/(millis()-prev_speed_measuring_time))*1000;
+    motor_current_speed = ((encoderTicks/2100.0)/(millis()-prev_speed_measuring_time))*1000 * 2 * M_PI;
     prev_speed_measuring_time = millis();
     encoderTicks = 0;
   }
@@ -82,9 +83,11 @@ void pwm_subscription_callback(const void * msgin)
   const std_msgs__msg__Float32 * msg = (const std_msgs__msg__Float32 *)msgin;
     current_pwm = msg->data;
     if (msg->data > 0) {
+        motor_direction = 1;
         digitalWrite(IN1, HIGH);
         digitalWrite(IN2, LOW);
     } else if (msg->data < 0) {
+        motor_direction = 0;
         digitalWrite(IN1, LOW);
         digitalWrite(IN2, HIGH);
     }
