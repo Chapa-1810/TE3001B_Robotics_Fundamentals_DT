@@ -4,6 +4,9 @@
   <material name="blue">
     <color rgba="0 0 0.8 1"/>
   </material>
+  <material name="dark_blue">
+    <color rgba="0 0 0.4 1"/>
+  </material>
   <material name="black">
     <color rgba="0 0 0 1"/>
   </material>
@@ -24,10 +27,10 @@
   <link name="U_arm_base">
     <visual>
       <geometry>
-        <box size="0.1 0.1 0.01" />
+        <box size="0.11 0.15 0.35" />
       </geometry>
-      <origin xyz="0 0 0"/>
-      <material name="white"/>
+      <origin xyz="0 0 0.175"/>
+      <material name="dark_blue"/>
     </visual>
   </link>
 
@@ -35,7 +38,7 @@
   <joint name="U_joint1" type="revolute">
     <parent link="base_link"/>
     <child link="U_arm_base"/>
-    <origin xyz="0 0.25 0.025"/>
+    <origin xyz="0.25 0 0"/>
     <axis xyz="0 0 1"/>
     <limit lower="-3.14" upper="3.14" effort="1000.0" velocity="0.5"/>
   </joint>
@@ -45,7 +48,7 @@
       <geometry>
         <box size="0.1 0.1 0.4"/>
       </geometry>
-      <origin xyz="0 0 0.16"/>
+      <origin xyz="0 0 0.2"/>
       <material name="blue"/>
     </visual>
   </link>
@@ -53,16 +56,16 @@
   <joint name="U_joint2" type="revolute">
     <parent link="U_arm_base"/>
     <child link="U_link1"/>
-    <origin xyz="0.0 0 0.05"/>
+    <origin xyz="0 0 0.35"/>
     <limit lower="-1.57" upper="1.57" effort="1000.0" velocity="0.5"/>
   </joint>
 
   <link name="U_link2">
     <visual>
       <geometry>
-        <box size="0.1 0.1 0.4"/>
+        <box size="0.05 0.05 0.2"/>
       </geometry>
-      <origin xyz="0 0 0.16"/>
+      <origin xyz="0 0 0.1"/>
       <material name="white"/>
     </visual>
   </link>
@@ -73,22 +76,38 @@
     <origin xyz="0 0 0.4"/>
     <limit lower="-1.57" upper="1.57" effort="1000.0" velocity="0.5"/>
   </joint>
+  
+  <link name="U_link_eef">
+    <visual>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <origin xyz="0 0 0"/>
+      <material name="black"/>
+    </visual>
+  </link>
+
+  <joint name="U_joint_eef" type="fixed">
+    <parent link="U_link2"/>
+    <child link="U_link_eef"/>
+    <origin xyz="0 0 0.2"/>
+  </joint>
 
   <link name="L_arm_base">
     <visual>
       <geometry>
-        <box size="0.1 0.1 0.01" />
+        <box size="0.11 0.15 0.35" />
       </geometry>
-      <origin xyz="0 0 0"/>
-      <material name="white"/>
-    </visual>+
+      <origin xyz="0 0 0.175"/>
+      <material name="dark_blue"/>
+    </visual>
   </link>
 
   <!-- change previous joint so it moves around the z axis instead-->
   <joint name="L_joint1" type="revolute">
     <parent link="base_link"/>
     <child link="L_arm_base"/>
-    <origin xyz="0.12 -0.25 0.025"/>
+    <origin xyz="-0.25 0.125 0"/>
     <axis xyz="0 0 1"/>
     <limit lower="-3.14" upper="3.14" effort="1000.0" velocity="0.5"/>
   </joint>
@@ -98,7 +117,7 @@
       <geometry>
         <box size="0.1 0.1 0.4"/>
       </geometry>
-      <origin xyz="0 0 0.16"/>
+      <origin xyz="0 0 0.2"/>
       <material name="blue"/>
     </visual>
   </link>
@@ -106,18 +125,18 @@
   <joint name="L_joint2" type="revolute">
     <parent link="L_arm_base"/>
     <child link="L_link1"/>
-    <origin xyz="0.0 0 0.05"/>
+    <origin xyz="0 0 0.35"/>
     <limit lower="-1.57" upper="1.57" effort="1000.0" velocity="0.5"/>
   </joint>
 
   <link name="L_link2">
     <visual>
       <geometry>
-        <box size="0.1 0.1 0.4"/>
+        <box size="0.05 0.05 0.2"/>
       </geometry>
-      <origin xyz="0 0 0.16"/>
+      <origin xyz="0 0 0.1"/>
       <material name="white"/>
-    </visual>
+    </visual> 
   </link>
 
   <joint name="L_joint3" type="revolute">
@@ -127,13 +146,29 @@
     <limit lower="-1.57" upper="1.57" effort="1000.0" velocity="0.5"/>
   </joint>
 
+  <link name="L_link_eef">
+    <visual>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <origin xyz="0 0 0"/>
+      <material name="black"/>
+    </visual>
+  </link>
+
+  <joint name="L_joint_eef" type="fixed">
+    <parent link="L_link2"/>
+    <child link="L_link_eef"/>
+    <origin xyz="0 0 0.2"/>
+  </joint>
+
   <link name="R_arm_base">
     <visual>
       <geometry>
-        <box size="0.1 0.1 0.01" />
+        <box size="0.11 0.15 0.35" />
       </geometry>
-      <origin xyz="0 0 0"/>
-      <material name="white"/>
+      <origin xyz="0 0 0.175"/>
+      <material name="dark_blue"/>
     </visual>
   </link>
 
@@ -141,7 +176,7 @@
   <joint name="R_joint1" type="revolute">
     <parent link="base_link"/>
     <child link="R_arm_base"/>
-    <origin xyz="-0.12 -0.25 0.025"/>
+    <origin xyz="-0.25 -0.125 0"/>
     <axis xyz="0 0 1"/>
     <limit lower="-3.14" upper="3.14" effort="1000.0" velocity="0.5"/>
   </joint>
@@ -151,7 +186,7 @@
       <geometry>
         <box size="0.1 0.1 0.4"/>
       </geometry>
-      <origin xyz="0 0 0.16"/>
+      <origin xyz="0 0 0.2"/>
       <material name="blue"/>
     </visual>
   </link>
@@ -159,16 +194,16 @@
   <joint name="R_joint2" type="revolute">
     <parent link="R_arm_base"/>
     <child link="R_link1"/>
-    <origin xyz="0.0 0 0.05"/>
+    <origin xyz="0 0 0.35"/>
     <limit lower="-1.57" upper="1.57" effort="1000.0" velocity="0.5"/>
   </joint>
 
   <link name="R_link2">
     <visual>
       <geometry>
-        <box size="0.1 0.1 0.4"/>
+        <box size="0.05 0.05 0.2"/>
       </geometry>
-      <origin xyz="0 0 0.16"/>
+      <origin xyz="0 0 0.1"/>
       <material name="white"/>
     </visual>
   </link>
@@ -179,5 +214,22 @@
     <origin xyz="0 0 0.4"/>
     <limit lower="-1.57" upper="1.57" effort="1000.0" velocity="0.5"/>
   </joint>
+
+  <link name="R_link_eef">
+    <visual>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <origin xyz="0 0 0"/>
+      <material name="black"/>
+    </visual>
+  </link>
+
+  <joint name="R_joint_eef" type="fixed">
+    <parent link="R_link2"/>
+    <child link="R_link_eef"/>
+    <origin xyz="0 0 0.2"/>
+  </joint>
+
   
 </robot>
