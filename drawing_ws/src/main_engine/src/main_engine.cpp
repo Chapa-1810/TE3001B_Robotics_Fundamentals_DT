@@ -122,9 +122,9 @@ void timer_callback(){
     auto path = main_interfaces::msg::PoseStampedArray();
     for (int i = 1; i <= 10; i++){
       geometry_msgs::msg::PoseStamped pose;
-      pose.pose.position.x = i;
-      pose.pose.position.y = i;
-      pose.pose.position.z = i;
+      pose.pose.position.x = i * 0.1;
+      pose.pose.position.y = i * 0.1;
+      pose.pose.position.z = i * 0.1;
       path.poses.push_back(pose);
     }
     path.size = 10;
