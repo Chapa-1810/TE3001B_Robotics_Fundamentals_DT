@@ -90,6 +90,9 @@ void service_callback(const rclcpp::Client<path_service>::SharedFuture future){
     RCLCPP_INFO(node_->get_logger(), "Service finished");
     action_goal.path = future.get()->path;
     service_done_ = true;
+    for(auto pose : action_goal.path.poses){
+      RCLCPP_INFO(node_->get_logger(), "Pose: %f %f %f", pose.pose.position.x, pose.pose.position.y, pose.pose.position.z);
+    }
   } else {
     RCLCPP_INFO(node_->get_logger(), "Service In-Progress...");
     service_done_ = false;
@@ -107,7 +110,6 @@ void timer_callback(){
     RCLCPP_INFO(node_->get_logger(), "Service already done");
     return;
   }
-
 
   auto msg = std_msgs::msg::String();
   msg.data = "Attempt to draw figure";
@@ -182,7 +184,7 @@ int main(int argc, char * argv[]){
   if (DEBUG_FIGURE){
     main_interfaces::msg::Figure data;
     data.figure_id = 2;
-    data.length = 0.2;
+    data.length = 0.05;
     data.radius = 0.0;
     data.width = 0;
     path_request->figure = data;

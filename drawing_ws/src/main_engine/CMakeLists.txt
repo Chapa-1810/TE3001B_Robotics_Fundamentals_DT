@@ -20,7 +20,13 @@ find_package(main_interfaces REQUIRED)
 add_executable(main_engine src/main_engine.cpp)
 ament_target_dependencies(main_engine main_interfaces rclcpp rclcpp_action std_msgs) # add main_interfaces
 add_executable(path_action_server src/path_action_server.cpp)
-ament_target_dependencies(path_action_server main_interfaces rclcpp rclcpp_action geometry_msgs) # add main_interfaces
+ament_target_dependencies(path_action_server main_interfaces rclcpp rclcpp_action geometry_msgs) # add main_interface
+
+# launch
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}/
+)
 
 install(TARGETS
   main_engine

@@ -23,6 +23,7 @@ auto action_goal = arm_service::Goal();
 auto send_goal_options = rclcpp_action::Client<arm_service>::SendGoalOptions();
 
 bool arm_done = false;
+bool finished_goals = false;
 
 auto result = std::make_shared<action_service::Result>();
 auto feedback = std::make_shared<action_service::Feedback>();
@@ -67,7 +68,7 @@ void result_callback(const rclcpp_action::ClientGoalHandle<arm_service>::Wrapped
 }
 
 void timer_callback(){
-  if (!arm_done) return;
+  if (!arm_done || finished_goals) return;
 
   goal_  = goal_handle_->get_goal();
 
@@ -99,7 +100,7 @@ void timer_callback(){
   RCLCPP_INFO(node_->get_logger(), "Iteration");
   if (rclcpp::ok() && ind == goal_->path.size) {
     result->completed = true;
-    ind = 0;
+    finished_goals = true;
     goal_handle_->succeed(result);
     RCLCPP_INFO(node_->get_logger(), "Goal succeeded");
   } 
@@ -124,6 +125,7 @@ rclcpp_action::CancelResponse handle_cancel(const std::shared_ptr<rclcpp_action:
 void handle_accepted(const std::shared_ptr<rclcpp_action::ServerGoalHandle<action_service>> goal_handle)
 {
   arm_done = true;
+  finished_goals = false;
   goal_handle_ = goal_handle;
   ind = 0;
 }

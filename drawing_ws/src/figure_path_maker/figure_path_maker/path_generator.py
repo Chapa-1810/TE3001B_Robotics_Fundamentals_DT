@@ -16,14 +16,15 @@ class PathGen(Node):
     figure.length = request.figure.length # length of the figure
     figure.width = request.figure.width # width of the figure
     figure.n = 1 # detail (number of points per edge)
-    figure.xO = 0.2 # x center of the figure
-    figure.yO = 0.2 # y center of the figure
-    figure.zO = 0.3 # z center of the figure
+    figure.xO = 0.1 # x center of the figure
+    figure.yO = 0.1 # y center of the figure
+    figure.zO = 0.2 # z center of the figure
     # Generate the path
     builtFlag = figure.buildPoses(request.figure.figure_id)
     # Sending the response
     if not builtFlag:
       response.path.poses = figure.poses.poses
+      response.path.size = len(figure.poses.poses)
       self.get_logger().info('Path generated')
       return response
     else:
