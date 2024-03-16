@@ -26,7 +26,8 @@ setup(
     entry_points={
         'console_scripts': [
             'signal_generator = reto_final.signal_generator:main',
-            'set_point = reto_final.set_point:main'
+            'set_point = reto_final.set_point:main',
+            'csv_recorder = reto_final.csv_recorder:main'
         ],
     },
 )
