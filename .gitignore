@@ -1,6 +1,10 @@
+.vscode
 jacobian_motion/simulation_ws/build
 jacobian_motion/simulation_ws/install
 jacobian_motion/simulation_ws/log
+PI_controller/ros_ws/build
+PI_controller/ros_ws/install
+PI_controller/ros_ws/log
 *.mp3
 *.pyc
 *.mp3

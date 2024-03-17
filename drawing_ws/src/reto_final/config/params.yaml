@@ -1,0 +1,7 @@
+signal_generator_node:
+  ros__parameters:
+    type_int: 0
+    time_float: 0.0
+    offset_float: 0.0
+    frequency_float: 1.0
+    amplitude_float: 3.0
