@@ -2,7 +2,10 @@
 <robot name="simple_serial_robot">
 
   <material name="blue">
-    <color rgba="0 0 0.8 1"/>
+    <color rgba="0 0.1 0.6 1"/>
+  </material>
+  <material name="dark_blue">
+    <color rgba="0 0 0.4 1"/>
   </material>
   <material name="black">
     <color rgba="0 0 0 1"/>
@@ -11,21 +14,25 @@
     <color rgba="1 1 1 1"/>
   </material>
 
+  
+
   <link name="base_link">
     <visual>
       <geometry>
-        <box size="0.0 0.0 0.0"/>
+        <box size="0.6 0.6 0.01" />
       </geometry>
-      <material name="blue"/>
+      <origin xyz="0 0 0"/>
+      <material name="black"/>
     </visual>
   </link>
 
   <link name="arm_base">
     <visual>
       <geometry>
-        <cylinder radius="0.25" length="0.05" />
+        <box size="0.11 0.15 0.35" />
       </geometry>
-      <material name="black"/>
+      <origin xyz="0 0 0.175"/>
+      <material name="dark_blue"/>
     </visual>
   </link>
 
@@ -33,7 +40,7 @@
   <joint name="joint1" type="revolute">
     <parent link="base_link"/>
     <child link="arm_base"/>
-    <origin xyz="0 0 0.025"/>
+    <origin xyz="0 0 0"/>
     <axis xyz="0 0 1"/>
     <limit lower="-3.14" upper="3.14" effort="1000.0" velocity="0.5"/>
   </joint>
@@ -43,7 +50,7 @@
       <geometry>
         <box size="0.1 0.1 0.4"/>
       </geometry>
-      <origin xyz="0 0 0.16"/>
+      <origin xyz="0 0 0.2"/>
       <material name="blue"/>
     </visual>
   </link>
@@ -51,16 +58,16 @@
   <joint name="joint2" type="revolute">
     <parent link="arm_base"/>
     <child link="link1"/>
-    <origin xyz="0.0 0 0.05"/>
-    <limit lower="-3.14" upper="3.14" effort="1000.0" velocity="0.5"/>
+    <origin xyz="0 0 0.35"/>
+    <limit lower="-1.57" upper="1.57" effort="1000.0" velocity="0.5"/>
   </joint>
 
   <link name="link2">
     <visual>
       <geometry>
-        <box size="0.1 0.1 0.4"/>
+        <box size="0.05 0.05 0.2"/>
       </geometry>
-      <origin xyz="0 0 0.16"/>
+      <origin xyz="0 0 0.1"/>
       <material name="white"/>
     </visual>
   </link>
@@ -69,9 +76,23 @@
     <parent link="link1"/>
     <child link="link2"/>
     <origin xyz="0 0 0.4"/>
-    <limit lower="-3.14" upper="3.14" effort="1000.0" velocity="0.5"/>
+    <limit lower="-1.57" upper="1.57" effort="1000.0" velocity="0.5"/>
   </joint>
+  
+  <link name="link_eef">
+    <visual>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <origin xyz="0 0 0"/>
+      <material name="black"/>
+    </visual>
+  </link>
 
-
-
+  <joint name="joint_eef" type="fixed">
+    <parent link="link2"/>
+    <child link="link_eef"/>
+    <origin xyz="0 0 0.2"/>
+  </joint>
+  
 </robot>
